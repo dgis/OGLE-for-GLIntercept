@@ -1,7 +1,7 @@
 #include "stdafx.h"
+#include "..\\InterceptPluginInterface.h"
 #include "OGLEPlugin.h"
 #include "ogle.h"
-#include "..\\InterceptPluginInterface.h"
 
 #include <ConfigParser.h>
 #include <CommonErrorLog.h>
@@ -71,6 +71,15 @@ void OGLEPlugin::ProcessConfigData(ConfigParser *parser)
 	  fprintf(OGLE::LOG, "CAPTURE NORMALS: %d\n", OGLE::config.captureNormals);
   }
 
+  testToken = parser->GetToken("CaptureTextureCoords");
+
+  if(testToken)
+  {
+	  testToken->Get(OGLE::config.captureTexCoords);
+	  fprintf(OGLE::LOG, "CAPTURE TEX COORDS: %d\n", OGLE::config.captureTexCoords);
+  }
+
+
   testToken = parser->GetToken("FlipPolygonStrips");
 
   if(testToken)
@@ -111,6 +120,16 @@ void OGLEPlugin::ProcessConfigData(ConfigParser *parser)
 	  fprintf(OGLE::LOG, "FilePerFrame: %d\n", filePerFrame);
   }
 
+  testToken = parser->GetToken("FileInFrameDir");
+
+  if(testToken)
+  {
+	  testToken->Get(fileInFrameDir);
+	  fprintf(OGLE::LOG, "FileInFrameDir: %d\n", fileInFrameDir);
+  }
+
+
+
 
   for(int i = 0; i < OGLE::Config::nPolyTypes; i++) {
 	  const char *type = OGLE::Config::polyTypes[i];
@@ -139,6 +158,7 @@ gliCallBacks(callBacks),
 GLV(callBacks->GetCoreGLFunctions()),
 objFileName("ogle"),
 filePerFrame(0),
+fileInFrameDir(0),
 isRecording(0)
 {
 
@@ -148,16 +168,28 @@ isRecording(0)
   gliCallBacks->RegisterGLFunction("glArrayElement");
   gliCallBacks->RegisterGLFunction("glVertex3fv");
   gliCallBacks->RegisterGLFunction("glVertex3f");
+  gliCallBacks->RegisterGLFunction("glVertex3dv");
+  gliCallBacks->RegisterGLFunction("glVertex3d");
   gliCallBacks->RegisterGLFunction("glNormal3fv");
   gliCallBacks->RegisterGLFunction("glNormal3f");
+  gliCallBacks->RegisterGLFunction("glTexCoord2fv");
+  gliCallBacks->RegisterGLFunction("glTexCoord3fv");
+  gliCallBacks->RegisterGLFunction("glTexCoord2f");
+  gliCallBacks->RegisterGLFunction("glTexCoord3f");
+  gliCallBacks->RegisterGLFunction("glClientActiveTexture");
+  gliCallBacks->RegisterGLFunction("glClientActiveTextureARB");
 
 
   gliCallBacks->RegisterGLFunction("glEnableClientState");
   gliCallBacks->RegisterGLFunction("glDisableClientState");
   gliCallBacks->RegisterGLFunction("glVertexPointer");
   gliCallBacks->RegisterGLFunction("glNormalPointer");
+  gliCallBacks->RegisterGLFunction("glTexCoordPointer");
   gliCallBacks->RegisterGLFunction("glDrawArrays");
   gliCallBacks->RegisterGLFunction("glDrawElements");
+
+  gliCallBacks->RegisterGLFunction("glInterleavedArrays");
+
 
   gliCallBacks->RegisterGLFunction("glDrawRangeElements");
   gliCallBacks->RegisterGLFunction("glDrawRangeElementsEXT");
@@ -237,6 +269,10 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 			GLenum  usage; _args.Get(usage);
 			ogle->glBufferData(target , size , data , usage);
 		}
+
+
+
+
 		if(OGLE_CAPTURE_BUFFERS_ALL_FRAMES) {
 			// but we dont need to keep the actual data up-to-date, because we 
 			// re-fetch before drawing.
@@ -284,27 +320,6 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 		GLsizei count; _args.Get(count);
 		ogle->glDrawArrays(mode , first , count);
 	}
-	else if(strcmp(funcName, "glEnableClientState") == 0) {
-		GLenum array; _args.Get(array);
-		ogle->glEnableClientState(array);		
-	}
-	else if(strcmp(funcName, "glDisableClientState") == 0) {
-		GLenum array; _args.Get(array);
-		ogle->glDisableClientState(array);
-	}
-	else if(strcmp(funcName, "glVertexPointer") == 0) {
-		GLint size; _args.Get(size);
-		GLenum type; _args.Get(type);
-		GLsizei stride; _args.Get(stride);
-		GLvoid *pointer; _args.Get(pointer);
-		ogle->glVertexPointer(size , type , stride , pointer);
-	}
-	else if(strcmp(funcName, "glNormalPointer") == 0) {
-		GLenum type; _args.Get(type);
-		GLsizei stride; _args.Get(stride);
-		GLvoid *pointer; _args.Get(pointer);
-		ogle->glNormalPointer(type , stride , pointer);
-	}
 	else if(strcmp(funcName, "glLockArraysEXT") == 0) {
 		GLint first; _args.Get(first);
 		GLsizei count; _args.Get(count);
@@ -343,6 +358,16 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 		GLfloat V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));
 		ogle->glVertexfv(V, 3);
 	}
+	else if(strcmp(funcName, "glVertex3dv") == 0) {
+		GLdouble *V; _args.Get(V);
+		GLfloat tmp[3]; tmp[0] = V[0]; tmp[1] = V[1]; tmp[2] = V[2];
+		ogle->glVertexfv(tmp, 3);
+	}
+	else if(strcmp(funcName, "glVertex3d") == 0) {
+		GLdouble V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));
+		GLfloat tmp[3]; tmp[0] = V[0]; tmp[1] = V[1]; tmp[2] = V[2];
+		ogle->glVertexfv(tmp, 3);
+	}
 	else if(strcmp(funcName, "glNormal3fv") == 0) {
 		GLfloat *V; _args.Get(V);
 		ogle->glNormalfv(V, 3);
@@ -351,6 +376,64 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 		GLfloat V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));
 		ogle->glNormalfv(V, 3);
 	}
+	else if(strcmp(funcName, "glTexCoord3fv") == 0) {
+		GLfloat *V; _args.Get(V);
+		ogle->glTexCoordfv(V, 3);
+	}
+	else if(strcmp(funcName, "glTexCoord2fv") == 0) {
+		GLfloat *V; _args.Get(V);
+		ogle->glTexCoordfv(V, 2);
+	}
+	else if(strcmp(funcName, "glTexCoord3f") == 0) {
+		GLfloat V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));
+		ogle->glTexCoordfv(V, 3);
+	}
+	else if(strcmp(funcName, "glTexCoord2f") == 0) {
+		GLfloat V[2]; _args.Get(*V); _args.Get(*(V+1));
+		ogle->glTexCoordfv(V, 2);
+	}
+	else if(strcmp(funcName, "glEnableClientState") == 0) {
+		GLenum array; _args.Get(array);
+		ogle->glEnableClientState(array);		
+	}
+	else if(strcmp(funcName, "glDisableClientState") == 0) {
+		GLenum array; _args.Get(array);
+		ogle->glDisableClientState(array);
+	}
+	else if(strcmp(funcName, "glClientActiveTexture") == 0
+		|| strcmp(funcName, "glClientActiveTextureARB") == 0) {
+		GLenum texture; _args.Get(texture);
+		ogle->glClientActiveTexture(texture);
+	}
+	else if(strcmp(funcName, "glVertexPointer") == 0) {
+		GLint size; _args.Get(size);
+		GLenum type; _args.Get(type);
+		GLsizei stride; _args.Get(stride);
+		GLvoid *pointer; _args.Get(pointer);
+		ogle->glVertexPointer(size , type , stride , pointer);
+	}
+	else if(strcmp(funcName, "glNormalPointer") == 0) {
+		GLenum type; _args.Get(type);
+		GLsizei stride; _args.Get(stride);
+		GLvoid *pointer; _args.Get(pointer);
+		ogle->glNormalPointer(type , stride , pointer);
+	}
+	else if(strcmp(funcName, "glTexCoordPointer") == 0) {
+		GLint size; _args.Get(size);
+		GLenum type; _args.Get(type);
+		GLsizei stride; _args.Get(stride);
+		GLvoid *pointer; _args.Get(pointer);
+		ogle->glTexCoordPointer(size , type , stride , pointer);
+	}
+	else if(strcmp(funcName, "glInterleavedArrays") == 0) {
+		GLenum format; _args.Get(format);
+		GLsizei stride; _args.Get(stride);
+		GLvoid *pointer; _args.Get(pointer);
+		ogle->glInterleavedArrays(format , stride , pointer);
+	}
+	
+
+
 
 
 	/*
@@ -412,11 +495,25 @@ void OGLEPlugin::GLFrameEndPost(const char *funcName, uint funcIndex, const Func
 		fprintf(OGLE::LOG, "Starting to record, to filename %s\n", objFileName.c_str()); fflush(OGLE::LOG);
 		isRecording = 1;
 		string fileName = objFileName;
+		unsigned int frame = gliCallBacks->GetFrameNumber();
+
 		if(filePerFrame) {
 			char buff[256];
 			sprintf(buff, ".%d", gliCallBacks->GetFrameNumber());
 			fileName.append(buff);
 		}
+		if(fileInFrameDir) {
+
+			string path;
+			StringPrintF(path,"Frame_%06u\\", frame);
+
+			path.append(fileName);
+
+			fileName = path;
+
+			fprintf(OGLE::LOG, "frame file: %s\n", fileName.c_str() ); 
+		}
+
 		fileName.append(".obj");
 		ogle->startRecording(fileName);
 	}
@@ -444,7 +541,7 @@ void OGLEPlugin::GLFrameEndPost(const char *funcName, uint funcIndex, const Func
 void OGLEPlugin::GLFrameEndPre(const char *funcName, uint funcIndex, const FunctionArgs & args )
 {
 	if(isRecording) {
-		fprintf(OGLE::LOG, "Done recording, %d total vertices\n", OGLE::vertexCount); fflush(OGLE::LOG);
+		fprintf(OGLE::LOG, "Done recording\n"); fflush(OGLE::LOG);
 		isRecording = 0;
 		ogle->stopRecording();
 	}

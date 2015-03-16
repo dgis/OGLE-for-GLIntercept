@@ -173,12 +173,11 @@ protected:
   const GLCoreDriver       *GLV;                  //The core OpenGL driver
   string objFileName;
   bool filePerFrame;
+  bool fileInFrameDir;
 
   bool isRecording;
 
   OGLEPtr ogle;
-
-//  OGLE::BufferPtr buff;
 
   //@
   //  Summary:

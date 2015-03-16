@@ -54,6 +54,7 @@
   	<h2 class="block-title">Navigation</h2>
     <div class="block-content"><ul >
 <li ><a href="http://ogle.eyebeamresearch.org/">Home</a></li>
+<li ><a href="http://ogle.eyebeamresearch.org/blog">Blog (stay updated)</a></li>
 <li ><a href="http://ogle.eyebeamresearch.org/architecture">How it Works</a></li>
 <li ><a href="http://ogle.eyebeamresearch.org/results">Example Results</a></li>
 <li ><a href="http://ogle.eyebeamresearch.org/download">Download</a></li>
@@ -189,7 +190,7 @@
   <li>
     Copy the whole OGLE distribution (i.e. the directory that contains the <code>OGLE.dll</code> file)
     into the <code>Plugins</code> directory for your GLIntercept installation, typically<br>
-    <code>C:\Program Files\GLIntercept0_5\Plugins\</code>, and rename the directory to <code>OGLE</code>.
+    <code>C:\Program Files\GLIntercept0_5\Plugins\</code>, and rename the directory to <code>OGLE</code> (i.e. change the name from <code>ogle_*</code> to <code>OGLE</code>).
   </li>
 
     
@@ -246,9 +247,11 @@ PluginData
 	Scale = 1.0;
 	FlipPolygonStrips = True;
 	CaptureNormals = False;
+	CaptureTextureCoords = False;
 	LogFunctions = False;
 	ObjFileName = "ogle";
         FilePerFrame = False;
+        FileInFrameDir = False;
 
 	TRIANGLES = True;
 	TRIANGLE_STRIP = True;
@@ -287,6 +290,11 @@ PluginData
           Capture vertex normals.  Currently this defaults to False because there is a suspected bug in the code that does it.
 	</li>
 
+        <li>
+	  <code>CaptureTextureCoords</code><br>
+          Capture texture coordinates (UV).  Currently this defaults to False because there is a suspected bug in the code that does it.  If you are going to use this option to try to re-assign the texture maps that GLIntercept writes to disk, you will need to flip those textures, or just use the <code>ImageLog::FlipXAxis</code> option for GLIntercept.
+	</li>
+
 
         <li>
 	  <code>LogFunctions</code><br>
@@ -301,9 +309,15 @@ PluginData
 	</li>
 
         <li>
+	  <code>FileInFrameDir</code><br>
+          flag whether or not to attempt to place the ouput OBJ file into the Frame_###### directory that GLIntercept creates.
+	</li>
+
+        <li>
 	  <code>FilePerFrame</code><br>
           flag whether or not to name your output file with the current frame #.  this allows you to capture more than one data set per run of your application.
 	</li>
+
 
 
         <li>
@@ -319,6 +333,9 @@ PluginData
       
       
     </li>
+
+    <li>The OGLE GUI: Someone has put together a Windows GUI app that supposedly makes all tihs copying and configuring a lot easier.  You can try it at your own risk at: <a href="http://members.chello.at/alexan/">http://members.chello.at/alexan/</a> and give the creator feedback on the <a href="https://sourceforge.net/forum/message.php?msg_id=3693622">SourceForge forum</a>.</li>
+
 </ul>
 </p>
 
@@ -344,7 +361,7 @@ PluginData
       Find the <code>.obj</code> file in the directory where your application runs.  Open it in 
       <a href="http://blender.org/cms/Home.2.0.html">Blender</a> (free!), <a href="http://artofillusion.org/">ArtOfIllusion</a> (also free!),  
       <a href="http://www.alias.com/glb/eng/products-services/family_details.jsp;jsessionid=53NE4KGL3GQQRQCLCWSSM44AJMK0IJVC?familyId=3900009">Maya</a> (not free),
-      or whatever other 3D editing/viewing/modelling application you use.
+      or whatever other 3D editing/viewing/modelling application you use.  See the <a href="http://ogle.eyebeamresearch.org/tools">tools</a> section of this site for links/recommendations.
     </li>
 
     <li>
@@ -368,6 +385,7 @@ It is possible that the application works on a scale that so big or so small tha
 <BR>
 </li>
 
+<a name="vertexprograms"></a>
   <li><i>OGLE runs, but all the objects appear to be smushed around the origin</i>:
 <BR> 
 Your application is probably using Vertex Programs to do positioning (see the <a href="http://ogle.eyebeamresearch.org/limitations#vertexprograms">Limitations</a> page).  But, you can disable that functionality from OpenGL using the <code>GLExtOverride</code> plugin that comes with GLIntercept (described <a href="http://sourceforge.net/forum/forum.php?thread_id=1427740&forum_id=529065">in  the forums</a>) by making the following additions to your glConfig.ini file:
@@ -386,6 +404,25 @@ PluginData
       }
 </pre>
  </li>
+
+
+<a name="vertexbuffers"></a>
+  <li><i>OGLE runs, but the capture is really a complete mess</i>:
+<BR> 
+It is possible that your application does something <i>extra funky</i> with Vertex Buffer Objects that confuses OGLE.  We recommend attempting to disable Vertex Buffer Objects much the same way that we disabled Vertex Programs <a href="readme#vertexprograms">above</a>:
+
+<pre>
+ 
+  ...
+	RemoveExtensions = (GL_ARB_vertex_buffer_object); 
+  ...
+
+</pre>
+
+Note: you will probably want to remove Vertex Programs as well as Vertex Buffer Objects, as such:<BR> 
+<code>RemoveExtensions = (GL_ARB_vertex_program, GL_ARB_fragment_program, GL_ARB_vertex_buffer_object)</code>
+
+</li>
 
   </ul>
 
@@ -419,6 +456,10 @@ PluginData
 	All content on this site is free to re-use under the 
 	Creative Commons 
 	<a href="http://creativecommons.org/licenses/by-sa/2.5/">Share Alike license <br><img src="themes/eyeres_smarty/images/cc.png"></a>
+
+	<br>
+	<br>
+	site powered by <a href="http://drupal.org">drupal</a>
 
 	<br>
 	

@@ -748,7 +748,7 @@ min_abs_index(const Vec& x)
 // Returns the value of the element with the maximum value
 template <class VectorT>
 inline typename VectorT::value_type
-maxy(const VectorT& x)
+max_fixed(const VectorT& x)
 {
   return *mtl_algo::max_element(x.begin(), x.end());
 }
@@ -763,7 +763,7 @@ maxy(const VectorT& x)
 //!typereqs: <tt>Vec::value_type</tt> must be LessThanComparible.
 template <class VectorT>
 inline typename VectorT::value_type
-miny(const VectorT& x)
+min_fixed(const VectorT& x)
 {
   return *mtl_algo::min_element(x.begin(), x.end());
 }
@@ -1304,7 +1304,7 @@ inline void generate_householder(T& alpha, const Vec& x,
     tau = T(0); // H = I
   else {
     Real beta = -xfer_sign(two_norm3(alpha_r, alpha_i, xnorm), alpha_r);
-    Real safe_min = std::numeric_limits<Real>::miny();
+    Real safe_min = std::numeric_limits<Real>::min_fixed();
     Real r_safe_min = Real(1) / safe_min;
     
     int count = 0;

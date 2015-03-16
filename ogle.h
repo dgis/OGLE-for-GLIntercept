@@ -1,20 +1,26 @@
 #ifndef __OGLE_H_
 #define __OGLE_H_
 
+#include "..\\InterceptPluginInterface.h"
+
 #include "mtl/mtl.h"
 #include "mtl/matrix.h"
-
 
 #include <vector>
 #include <deque>
 #include <map>
 #include <string>
 
-#include "Ptr/Interface.h"
-#include "Ptr/Ptr.h"
 
 #define OGLE_BIND_BUFFERS_ALL_FRAMES 1
 #define OGLE_CAPTURE_BUFFERS_ALL_FRAMES 0
+
+#define OGLE_N_BUFFERS (4096*2)
+
+#include "Ptr/Interface.h"
+#include "Ptr/Ptr.h"
+
+class ObjFile;
 
 class OGLE : public Interface {
 
@@ -33,6 +39,7 @@ public:
 	class Vertex : public Interface {
 		public:
 			GLfloat x,y,z,w;
+			GLbyte size;
 
 			inline Vertex();
 			inline Vertex(Vector v);
@@ -43,8 +50,6 @@ public:
 			inline void fromVector(Vector v);
 
 			inline Vector toVector();
-
-			void printToObjFile(FILE *f, const char *typeStr = "");	
 	};
 	typedef Ptr<Vertex> VertexPtr;
 
@@ -75,7 +80,7 @@ public:
 
 	class ElementSet : public Interface {
 		public:
-			ElementSet(GLenum _mode, Transform _transform);
+			ElementSet(GLenum _mode, Transform _transform, Transform _texCoordTransform);
 			ElementSet(GLenum _mode);
 
   			// add a Element with just a location Vertex
@@ -83,48 +88,17 @@ public:
 			void addElement(VertexPtr V);
 			void addElement(ElementPtr E);
 
-
-			void printToObj(FILE *f);
-
 			bool hasTransform;
 			Transform transform;	
+			Transform texCoordTransform;	
 			//vector<VertexPtr> vertices;
 
-			/* for now we are only doing the locations, not the normals/textures */
-			vector<ElementPtr> vertices;
-			/**/
+			vector<ElementPtr> elements;
 
 			GLenum mode;
 	};
 	typedef Ptr<ElementSet> ElementSetPtr;
 
-	//////////////////////////////////////////////////////////////////////
-	// OGLE::ObjFile -- Class for outputting data to an ObjFile
-	//////////////////////////////////////////////////////////////////////	
-
-	class ObjFile : public Interface {
-		public:
-
-			struct Vertex {
-				public:
-					int vid, nid;
-					Vertex(int _vid = 0, int _nid = 0) : vid(_vid), nid(_nid) {}
-			};
-
-			class Face : public Interface {
-				public:
-					Face() {}
-					inline void addVertex(Vertex v);
-					inline void shiftVertices(int n = 1);
-					inline void clear();
-					void printToObj(FILE *f, bool flip = 0);
-
-					deque<Vertex>vertices;
-			};
-
-			typedef Ptr<Face> FacePtr;
-
-	};
 
 	//////////////////////////////////////////////////////////////////////
 	// OGLE::Blob -- Class for polymorphic storage of small primitive types
@@ -175,6 +149,20 @@ public:
 	typedef Ptr<Buffer> BufferPtr;
 
 
+	class CArray : public Interface {
+
+	  public:
+		GLboolean	enabled;
+		GLint		size;
+		GLenum		type;
+		GLsizei		stride;
+		const GLbyte*	data;
+
+		inline CArray();
+	};
+
+	typedef Ptr<CArray> CArrayPtr;
+
 
 	struct ltstr
 	{
@@ -192,6 +180,7 @@ public:
 			float scale;
 			bool logFunctions;
 			bool captureNormals;
+			bool captureTexCoords;
 			bool flipPolyStrips;
 			map<const char*, bool, ltstr>polyTypesEnabled;			
 
@@ -221,6 +210,7 @@ public:
 
 	void glVertexfv(GLfloat *V, GLsizei n);
 	void glNormalfv(GLfloat *V, GLsizei n);
+	void glTexCoordfv(GLfloat *V, GLsizei n);
 
 	void glArrayElement (GLint i);
 	void glDrawElements (GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);
@@ -229,6 +219,13 @@ public:
 	void glDisableClientState (GLenum array);
 	void glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 	void glNormalPointer (GLenum type, GLsizei stride, const GLvoid *pointer);
+
+	void glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid *pointer);
+
+
+	void glClientActiveTexture(GLenum texture);
+	void glTexCoordPointer (GLint	size, GLenum type, GLsizei stride, const GLvoid *pointer);
+	
 
 	void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
 	void glLockArraysEXT(GLint first, GLsizei count);
@@ -241,11 +238,15 @@ public:
 	void glUnmapBuffer(GLenum target);
 
 	void initFunctions();
-	Transform getCurrTransform();
+	Transform getCurrTransform(GLenum type = GL_MODELVIEW_MATRIX);
+
+	GLint derefClientArray(CArray *arr, GLfloat *v, GLint i);
+
 	GLuint getBufferIndex(GLenum target);
 	const GLbyte *OGLE::getBufferedArray(const GLbyte *array);
 	const GLvoid *getBufferedIndices(const GLvoid *indices);
 	void checkBuffers();
+
 	bool isElementLocked(int index);
 
 
@@ -253,38 +254,42 @@ public:
 	InterceptPluginCallbacks *callBacks;
     const GLCoreDriver       *GLV;                  //The core OpenGL driver
 	std::map<const char*, BlobPtr, ltstr> glState;
+
+	CArray vArray;
+	CArray nArray;
+	CArrayPtr tArray;
+	CArrayPtr tArrayActive;
+	
+	std::vector<CArrayPtr> tArrays;
+	GLint activeClientTex;
+
 	std::vector<BufferPtr> buffers;
 
 	bool extensionVBOSupported;
 	void    (GLAPIENTRY *iglGetBufferSubData) (GLenum, GLint, GLsizei, GLvoid *);
 
     Ptr<ElementSet> currSet;
-    VertexPtr currTexture, currNormal;
+    VertexPtr currTexCoord, currNormal;
 	std::vector<ElementSetPtr> sets;
 
+
 	string objFileName;
-	FILE *objFile;
+
+	Ptr<ObjFile> objFile;
 
 
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Static methods and variables for the OGLE class
 
-	static int nextVertexID();
-	static int nextNormalID();
-	static int nextGroupID();
 	static void init();
 
-	static GLfloat OGLE::derefVertexArray(const GLbyte *array, GLint dim, GLenum type, GLsizei stride, GLint vindex, GLint index);
+	static GLfloat derefVertexArray(const GLbyte *array, GLint dim, GLenum type, GLsizei stride, GLint vindex, GLint index);
 	static GLint derefIndexArray(GLenum type, const GLvoid *indices, int i);
 
 	static VertexPtr doTransform(VertexPtr vp, Transform T);
 	static bool isIdentityTransform(Transform T);
 	static GLsizei glTypeSize(GLenum type);
-
-	static int vertexCount;
-	static int normalCount;
-	static int groupCount;
 
 	static FILE *LOG;
 	static Config config;
@@ -294,6 +299,16 @@ typedef Ptr<OGLE> OGLEPtr;
 
 
 
+
+
+
+OGLE::CArray::CArray() {
+	enabled = false;
+	size = 4;
+	type = GL_FLOAT;
+	stride = 0;
+	data = NULL;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -316,6 +331,7 @@ OGLE::Vertex::Vertex(GLfloat _x, GLfloat _y, GLfloat _z, GLfloat _w) {
 
 void OGLE::Vertex::init(GLfloat _x, GLfloat _y, GLfloat _z, GLfloat _w) {
 			x = _x; y = _y; z = _z; w = _w;
+			size = 4;
 }
 
 OGLE::Vertex::Vertex(Vector v) {
@@ -330,6 +346,7 @@ OGLE::Vertex::Vertex(const GLfloat *v, GLint n) {
 		  V[i] = (float)v[i];
 	  }
 	  this->fromVector(V);
+	  size = n;
 }
 
 void OGLE::Vertex::fromVector(Vector v) {
@@ -339,6 +356,7 @@ void OGLE::Vertex::fromVector(Vector v) {
 	case 2: y = v[1];
 	case 1: x = v[0];				
 	}
+	size = v.size();
 }
 
 
@@ -360,26 +378,15 @@ OGLE::Buffer::Buffer(const GLvoid *_ptr, GLsizei _size) {
 	}
 }
 
-
-void OGLE::ObjFile::Face::addVertex(Vertex v) { 
-	vertices.push_back(v); 
-}
-
-void OGLE::ObjFile::Face::shiftVertices(int n) { 
-	while(n-- > 0) vertices.pop_front(); 
-}
-
-void OGLE::ObjFile::Face::clear() { 
-	vertices.clear(); 
-}
-
 OGLE::Buffer::~Buffer() {
 	if(ptr) free(ptr);
 }
 
 
 
-OGLE::Config::Config() : scale(1), logFunctions(0), captureNormals(0), flipPolyStrips(1) {
+OGLE::Config::Config() : scale(1), logFunctions(0), 
+						 captureNormals(0), captureTexCoords(0), 
+						 flipPolyStrips(1) {
 	for(int i = 0; i < OGLE::Config::nPolyTypes; i++) {
 		const char *type = OGLE::Config::polyTypes[i];
 		polyTypesEnabled[type] = 1;
