@@ -1,28 +1,14 @@
 // -*- c++ -*-
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 
@@ -793,7 +779,13 @@ namespace mtl {
           typename IF< EQUAL< Uplo, unit_upper >::RET, unit_upper__,
           typename IF< EQUAL< Uplo, lower>::RET, lower__, 
           typename IF< EQUAL< Uplo, unit_lower>::RET, unit_lower__,
+#if defined __SUNPRO_CC
+          typename IF< EQUAL< Uplo, 100>::RET, dynamic_uplo__,
+#endif
           dynamic_uplo__
+#if defined __SUNPRO_CC
+      >::RET
+#endif
       >::RET
       >::RET
       >::RET
@@ -1047,16 +1039,16 @@ namespace mtl {
   //!definition: matrix.h
   //!tparam: Matrix - The type of the Matrix to be viewed, must be dense
   //!tparam: Uplo - Whether to view the upper or lower triangle of the matrix
-  template <class Matrix, int Uplo>
+  template <class Matrix, int UL>
   struct triangle_view {
     typedef typename Matrix::sparsity Sparsity;
     enum { Sparsity_id = Sparsity::id };
     //: The generated type
+    typedef typename generate_uplo<UL>::RET up_or_lower;
     typedef typename IF< EQUAL< Sparsity_id, DENSE>::RET,
-      triangle_matrix< typename Matrix::banded_view_type, 
-                       typename generate_uplo<Uplo>::RET>,
-                triangle_matrix< Matrix, typename generate_uplo<Uplo>::RET>
-              >::RET type;
+			 triangle_matrix<typename Matrix::banded_view_type, up_or_lower>,
+                         triangle_matrix< Matrix, up_or_lower >
+                       >::RET type;
   };
 
   //: Triangle View Creation Helper Fuctor
@@ -1069,7 +1061,7 @@ namespace mtl {
   template <int Uplo>
   struct tri_view {
     template <class Matrix>
-    inline typename triangle_view<Matrix, Uplo>::type operator()(Matrix x) {
+    inline typename triangle_view<Matrix, Uplo>::type operator()(Matrix x) const {
       typedef typename triangle_view<Matrix, Uplo>::type TriView;
       return TriView(x);
     }

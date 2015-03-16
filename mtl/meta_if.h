@@ -24,7 +24,8 @@
 
 namespace mtl {
 
-#if MTL_PARTIAL_SPEC
+  //sun workshop 6 update 2 did not handle partial specialized IF 
+#if (MTL_PARTIAL_SPEC) && (!defined  __SUNPRO_CC)
 
   template <int cond, class A, class B>
   struct IF { };

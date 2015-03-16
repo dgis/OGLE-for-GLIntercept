@@ -1,28 +1,14 @@
 /* -*- c++ -*- */
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 
 #ifndef MTL_LAPACK_H
 #define MTL_LAPACK_H
@@ -428,7 +414,7 @@ namespace mtl_lapack_dispatch {
 		    double da[], const int& lda, double b[], const int& ldb,
 		    const double& rcond, int& rank, int& info)
   {
-    int ldwork = 5*max(m,n);
+    int ldwork = 5*MTL_MAX(m,n);
     double* work = new double[ldwork];
     double* s = new double[ldwork];
     MTL_FCALL(dgelss)(m, n, nrhs, da, lda, b, ldb, s, rcond, rank, work, ldwork, info);
@@ -440,7 +426,7 @@ namespace mtl_lapack_dispatch {
 		    float da[], const int& lda, float b[], const int& ldb,
 		    const float& rcond, int& rank, int& info)
   {
-    int ldwork = 5*max(m,n);
+    int ldwork = 5*MTL_MAX(m,n);
     float* work = new float[ldwork];
     float* s = new float[ldwork];
     MTL_FCALL(sgelss)(m, n, nrhs, da, lda, b, ldb, s, rcond, rank, work, ldwork, info);
@@ -454,7 +440,7 @@ namespace mtl_lapack_dispatch {
 		    std::complex<float> b[], const int& ldb,
 		    const float& rcond, int& rank, int& info)
   {
-    int ldwork = 5*max(m,n);
+    int ldwork = 5*MTL_MAX(m,n);
     std::complex<float>* work = new std::complex<float>[ldwork];
     std::complex<float>* s = new std::complex<float>[ldwork];
     MTL_FCALL(cgelss)(m, n, nrhs, da, lda, b, ldb, s, rcond, rank, work, ldwork, info);
@@ -468,7 +454,7 @@ namespace mtl_lapack_dispatch {
 		    std::complex<double> b[], const int& ldb,
 		    const double& rcond, int& rank, int& info)
   {
-    int ldwork = 5*max(m,n);
+    int ldwork = 5*MTL_MAX(m,n);
     std::complex<double>* work = new std::complex<double>[ldwork];
     std::complex<double>* s = new std::complex<double>[ldwork];
     MTL_FCALL(zgelss)(m, n, nrhs, da, lda, b, ldb, s, rcond, rank, work, ldwork, info);
@@ -519,7 +505,7 @@ namespace mtl_lapack_dispatch {
 		    const int& ldvt, int& info)
   {
     //allocate work space
-    int lwork = max(3*min(m,n)+max(m,n),5*min(m,n));
+    int lwork = MTL_MAX(3*MTL_MIN(m,n)+MTL_MAX(m,n),5*MTL_MIN(m,n));
     double* work = new double[lwork];
 
     MTL_FCALL(dgesvd)(jobu, jobvt, m, n, da, lda, ds, du, ldu, dvt, ldvt, work, lwork, info);
@@ -534,7 +520,7 @@ namespace mtl_lapack_dispatch {
 		    const int& ldvt, int& info)
   {
     //allocate work space
-    int lwork = max(3*min(m,n)+max(m,n),5*min(m,n));
+    int lwork = MTL_MAX(3*MTL_MIN(m,n)+MTL_MAX(m,n),5*MTL_MIN(m,n));
     float* work = new float[lwork];
 
     MTL_FCALL(sgesvd)(jobu, jobvt, m, n, da, lda, ds, du, ldu, dvt, ldvt, work, lwork, info);
@@ -549,9 +535,9 @@ namespace mtl_lapack_dispatch {
 		    std::complex<double> dvt[], const int& ldvt, int& info)
   {
     //allocate work space
-    int lwork = 2*min(m,n)+max(m,n);
+    int lwork = 2*MTL_MIN(m,n)+MTL_MAX(m,n);
     std::complex<double>* work = new std::complex<double>[lwork];
-    int lrwork = 5*min(m,n);
+    int lrwork = 5*MTL_MIN(m,n);
     double* rwork = new double[lrwork];
 
     MTL_FCALL(zgesvd)(jobu, jobvt, m, n, da, lda, ds, du, ldu, dvt, ldvt, work, lwork, rwork, info);
@@ -567,9 +553,9 @@ namespace mtl_lapack_dispatch {
 		    std::complex<float> dvt[], const int& ldvt, int& info)
   {
     //allocate work space
-    int lwork = 2*min(m,n)+max(m,n);
+    int lwork = 2*MTL_MIN(m,n)+MTL_MAX(m,n);
     std::complex<float>* work = new std::complex<float>[lwork];
-    int lrwork = 5*min(m,n);
+    int lrwork = 5*MTL_MIN(m,n);
     float* rwork = new float[lrwork];
 
     MTL_FCALL(cgesvd)(jobu, jobvt, m, n, da, lda, ds, du, ldu, dvt, ldvt, work, lwork, rwork, info);
@@ -1045,7 +1031,7 @@ enum GEEV_JOBV {GEEV_CALC_LEFT,	GEEV_CALC_RIGHT, GEEV_CALC_BOTH, GEEV_CALC_NONE}
 
     int info, rank;
 
-    const int max_length = max(b.size(), x.size());
+    const int max_length = MTL_MAX(b.size(), x.size());
 
     typedef typename VectorT::value_type T;
     T *rhs_data = new T[max_length];
@@ -1132,18 +1118,18 @@ enum GEEV_JOBV {GEEV_CALC_LEFT,	GEEV_CALC_RIGHT, GEEV_CALC_BOTH, GEEV_CALC_NONE}
 
 
 
-  template <class LapackMatA, class VectorT>
-  int gesvd(char jobu, char jobvt, LapackMatA& a, VectorT& s, 
+  template <class LapackMatA, class VectorT, class LapackMatU, class LapackMatVT>
+  int gesvd(const char& jobu, const char& jobvt, LapackMatA& a, VectorT& s, 
 	    LapackMatU& u, LapackMatVT& vt)
   {
     int info;
-    int lda = a.minor();
-    int m = a.nrows();
-    int n = a.ncols();
-    int ldu = u.minor();
-    int ldvt = vt.minor();
+    const int lda = a.minor();
+    const int m = a.nrows();
+    const int n = a.ncols();
+    const int ldu = u.minor();
+    const int ldvt = vt.minor();
 
-    mtl_lapack_dispatch::gesvd(jobu, jobv, m, n, a.data(), lda, s.data(),
+    mtl_lapack_dispatch::gesvd(jobu, jobvt, m, n, a.data(), lda, s.data(),
 			       u.data(), ldu, vt.data(), ldvt, info);
     return info;
   }

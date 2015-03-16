@@ -4,8 +4,8 @@
 #define MTL_CONFIG_H
 
 
-/* #undef HAVE_COPYSIGN */
-/* #undef HAVE_STD_ABS */
+#define HAVE_COPYSIGN 1
+#define HAVE_STD_ABS 1
 #define MTL_EXCEPTIONS 0
 /* #undef USE_BLAIS */
 #define MTL_CMPLR_HAS_LIMITS 1
@@ -20,11 +20,17 @@
 #define PACKAGE "mtl"
 
 /* Version number of package */
-#define VERSION "2.1.2-20"
+#define VERSION "2.1.2-22"
 
 
 #if defined(_MSC_VER) && !defined(__MWERKS__)
-#define _MSVCPP_ _MSC_VER
+#	if	( _MSC_VER < 1300 )
+#		define _MSVCPP_ _MSC_VER
+#	elif	( _MSC_VER < 1400 )
+#		define _MSVCPP7_ _MSC_VER
+#	else
+#		define _MSVCPP8_ _MSC_VER
+#	endif
 #endif
 
 /* Assuming that configure is not run for Visual C++ and
@@ -69,14 +75,14 @@
 #define MTL_ABS std::abs
 
 
-#ifdef _MSVCPP_
+#if defined ( _MSVCPP_ ) || defined ( _MSVCPP7_ )
 #define MTL_PARTIAL_SPEC 0
 #else
 #define MTL_PARTIAL_SPEC 1
 #endif
 
 
-#if defined(__GNUC__) || defined(_MSVCPP_) || defined( __MWERKS__)
+#if defined(__GNUC__) || defined(_MSVCPP_) || defined(_MSVCPP7_) || defined( __MWERKS__)
 #define MTL_DISABLE_BLOCKING
 #endif
 
@@ -90,7 +96,7 @@
 
 
 #define PACKAGE "mtl"
-#define VERSION "2.1.2-20"
+#define VERSION "2.1.2-22"
 
 #endif
 

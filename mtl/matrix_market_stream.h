@@ -1,28 +1,14 @@
 // -*- c++ -*-
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//                                                                           
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 
@@ -178,8 +164,8 @@ operator>>(matrix_market_stream<T>& mms, entry2<PR_>& e) {
 
 #if _MSVCPP_
 
-inline matrix_market_stream<complex<float> >& 
-operator>>(matrix_market_stream<complex<float> >& mms, entry2<complex<float> >& e) {
+inline matrix_market_stream<float>& 
+operator>>(matrix_market_stream<float>& mms, entry2<complex<float> >& e) {
   if ( mms.eof() ) { 
     e = entry2<complex<float> >();
     return mms;
@@ -200,8 +186,8 @@ operator>>(matrix_market_stream<complex<float> >& mms, entry2<complex<float> >& 
   return mms;
 }
 
-inline matrix_market_stream<complex<double> >& 
-operator>>(matrix_market_stream<complex<double> >& mms, entry2<complex<double> >& e) {
+inline matrix_market_stream<double>& 
+operator>>(matrix_market_stream<double>& mms, entry2<complex<double> >& e) {
   if ( mms.eof() ) { 
     e = entry2<complex<double> >();
     return mms;

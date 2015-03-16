@@ -65,33 +65,33 @@ public:
 
   class block_vector {
   public:
-    typedef Block reference;
-    typedef const Block const_reference;
-    typedef Block value_type;
-    typedef Block* pointer;
+    typedef typename Block reference;
+    typedef typename const Block const_reference;
+    typedef typename Block value_type;
+    typedef typename Block* pointer;
     typedef typename Block::size_type size_type;
     typedef typename Block::difference_type difference_type;
 
     enum { M = 0, N = 0 };
 
-    typedef block_vector subrange_type;
-    typedef dense_tag sparsity;
-    typedef block_vector IndexArray; /* bogus */
-    typedef block_vector IndexArrayRef; /* bogus */
+    typedef typename block_vector subrange_type;
+    typedef typename dense_tag sparsity;
+    typedef typename block_vector IndexArray; /* bogus */
+    typedef typename block_vector IndexArrayRef; /* bogus */
     
-    typedef oned_tag dimension; /* bogus */
+    typedef typename oned_tag dimension; /* bogus */
 
     template <int isConst>
     class __iterator {
       typedef __iterator self;
     public:
-      typedef typename IF<isConst, block_vector::const_reference, 
-                 block_vector::reference>::RET reference;
-      typedef block_vector::value_type value_type;
-      typedef block_vector::pointer pointer;
-      typedef block_vector::size_type size_type;
-      typedef block_vector::difference_type difference_type;
-      typedef std::random_access_iterator_tag iterator_category;
+      typedef typename IF<isConst, typename block_vector::const_reference, 
+                 typename block_vector::reference>::RET reference;
+      typedef typename block_vector::value_type value_type;
+      typedef typename block_vector::pointer pointer;
+      typedef typename block_vector::size_type size_type;
+      typedef typename block_vector::difference_type difference_type;
+      typedef typename std::random_access_iterator_tag iterator_category;
 
       inline __iterator(T* s, size_type p, size_type str, size_type ld_,
 		      block_dim_type bd)

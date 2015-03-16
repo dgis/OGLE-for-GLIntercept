@@ -125,12 +125,13 @@ public:
     class __iterator {
       typedef __iterator self;
     public:
-      typedef oned::value_type value_type;
-      typedef oned::pointer pointer;
-      typedef oned::size_type size_type;
-      typedef oned::difference_type difference_type;
+      typedef typename oned::value_type value_type; 
+      typedef typename oned::pointer    pointer;
+      typedef typename oned::size_type size_type;
+      typedef typename oned::difference_type difference_type;
 
-      typedef typename IF<isConst, oned::const_reference, oned::reference>::RET reference;
+      typedef typename IF<isConst, typename oned::const_reference, 
+	                           typename oned::reference>::RET reference;
 
       typedef std::random_access_iterator_tag iterator_category;
 

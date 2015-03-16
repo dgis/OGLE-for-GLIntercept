@@ -23,18 +23,18 @@ oned_set(Vector x, const T& alpha, fast::count<N>)
 {
   fast::fill(x.begin(), fast::count<N>(), alpha);
 }
-#endif
+#endif //USE_BLAIS
 template <class Vector, class T> inline
 void
-__set(Vector x, const T& alpha, oned_tag)
+set__(Vector x, const T& alpha, oned_tag)
 {
-  oned_set(x, alpha, dim_n<Vector>::RET());
+  oned_set(x, alpha, typename dim_n<Vector>::RET());
 }
 
 
 template <class Matrix, class T> inline
 void
-__set(Matrix A, const T& alpha, fast::count<0>)
+set__(Matrix A, const T& alpha, fast::count<0>)
 {
   typename Matrix::iterator i;
   typename Matrix::OneD::iterator j, jend;
@@ -48,18 +48,18 @@ __set(Matrix A, const T& alpha, fast::count<0>)
 #if USE_BLAIS
 template <class Matrix, class T, int M> inline
 void
-__set(Matrix A, const T& alpha, fast::count<M>)
+set__(Matrix A, const T& alpha, fast::count<M>)
 {
   enum { N = dim_n<Matrix>::RET::N };
   blais_m::set<M,N>(A, alpha);
 }
-#endif
+#endif //USE_BLAIS
 
 template <class Matrix, class T> inline
 void
-__set(Matrix A, const T& alpha, twod_tag)
+set__(Matrix A, const T& alpha, twod_tag)
 {
-  __set(A, alpha, dim_m<Matrix>::RET());
+  set__(A, alpha, typename dim_m<Matrix>::RET());
 }
 
 
@@ -83,12 +83,24 @@ __set(Matrix A, const T& alpha, twod_tag)
 //!complexity: O(m*n) for dense matrix, O(nnz) for sparse, O(n) for vector
 //!typereqs: <TT>Vector</TT> must be mutable
 //!typereqs: <TT>T</TT> is convertible to <TT>Vector</TT>'s <TT>value_type</TT>
+
+#if !defined(_MSVCPP_) && !defined (_MSVCPP7_)
+template <class LinalgObj, class T>
+inline void
+set(LinalgObj A, const T& alpha)
+{
+  typedef typename linalg_traits<LinalgObj>::dimension Dim;
+  set__(A, alpha, Dim());
+}
+#endif // #if !defined(_MSVCPP_)
+
+//use it to replace mtl::set in Visual C++ 
 template <class LinalgObj, class T>
 inline void
 set_value(LinalgObj A, const T& alpha)
 {
   typedef typename linalg_traits<LinalgObj>::dimension Dim;
-  __set(A, alpha, Dim());
+  set__(A, alpha, Dim());
 }
 
 } /* namespace mtl */

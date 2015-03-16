@@ -1,27 +1,13 @@
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 #ifndef MTL_LINALG_VECTOR_H
@@ -146,15 +132,15 @@ public:
       typedef Vec_difference_type difference_type;
       typedef typename std::iterator_traits<Vec_iterator>::iterator_category iterator_category;
       iterator(Vec_iterator iter, Vec_iterator e) : i(iter), end(e) {
-	while (*i == Vec_value_type(0)) ++i;
+	while (*i == self::Vec_value_type(0)) ++i;
       }
       reference operator*() const { return i.index(); }
       iterator& operator++() { 
-	++i; while (*i == Vec_value_type(0) && i != end) ++i;
+	++i; while (*i == self::Vec_value_type(0) && i != end) ++i;
 	return *this; }
       iterator operator++(int) { iterator t = *this; ++(*this); return t; }
       iterator& operator--() { 
-	--i; while (*i == Vec_value_type(0) && i != end) --i;
+	--i; while (*i == self::Vec_value_type(0) && i != end) --i;
 	return *this; }
       iterator operator--(int) { iterator t = *this; --(*this); return t; }
       difference_type operator-(const iterator& x) const { return i - x.i; }
@@ -173,16 +159,16 @@ public:
       typedef typename std::iterator_traits<Vec_iterator>::iterator_category iterator_category;
       const_iterator(Vec_const_iterator iter, Vec_const_iterator e)
 	: i(iter), end(e) { 
-	while (*i == Vec_value_type(0) && i != end) ++i;
+	while (*i == self::Vec_value_type(0) && i != end) ++i;
       }
       reference operator*() const { return i.index(); }
       const_iterator& operator++() { 
-	++i; while (*i == Vec_value_type(0) && i != end) ++i;
+	++i; while (*i == self::Vec_value_type(0) && i != end) ++i;
 	return *this; }
       const_iterator operator++(int) { 
 	const_iterator t = *this; ++(*this); return t; }
       const_iterator& operator--() { 
-	--i; while (*i == Vec_value_type(0)) --i;
+	--i; while (*i == self::Vec_value_type(0)) --i;
 	return *this; }
       const_iterator operator--(int) { 
 	const_iterator t = *this; --(*this); return t; }
@@ -210,7 +196,7 @@ public:
       size_type s = 0;
       Vec_const_iterator i;
       for (i = ((const Vec*)vec)->begin(); i != ((const Vec*)vec)->end(); ++i)
-	if (*i != Vec_value_type(0)) ++s;
+	if (*i != self::Vec_value_type(0)) ++s;
       return s;
     }
 
@@ -400,14 +386,29 @@ public:
   typedef T* pointer;
   //: The const reference type
   typedef const T& const_reference;
-#if !defined( _MSVCPP_)
-  //: The iterator type
-  typedef dense_iterator<T*,0,size_type> iterator;
-  //: The const iterator type
-  typedef dense_iterator<const T*,0,size_type> const_iterator;
-#else
+  //: The const pointer to the value type
+  typedef const T* const_pointer;
+
+#if defined( _MSVCPP_ )
+
   typedef dense_iterator<T, 0, 0, size_type> iterator;
   typedef dense_iterator<T, 1, 0, size_type> const_iterator;
+
+#elif defined ( _MSVCPP7_ )
+  /// used std::_Ptrit in order to support iterator_traits for 
+  /// pointers masquerading as iterators as per std::vector and std::basic_string - BEL
+  //
+  typedef std::_Ptrit<value_type, difference_type, pointer, reference, pointer, reference> ptr_iterator;
+  typedef std::_Ptrit<value_type, difference_type, const_pointer, const_reference, pointer, reference> ptr_const_iterator;
+
+  typedef dense_iterator<ptr_iterator,0,size_type> iterator;
+  typedef dense_iterator<ptr_const_iterator,0,size_type> const_iterator;
+
+#else
+
+  typedef dense_iterator<T*,0,size_type> iterator;
+  typedef dense_iterator<const T*,0,size_type> const_iterator;
+
 #endif
   //: The reverse iterator type
   typedef reverse_iter<iterator> reverse_iterator;

@@ -23,7 +23,7 @@
 // This file must be defined and be in the include path so the common
 // tools know how to log error messages. Other projects only need to define
 // the following #defines to use the common tools. (can be empty defines for no logging)
-#include "..\\..\\InterceptPluginInterface.h"
+#include "../../MainLib/InterceptPluginInterface.h"
 
 #define USING_ERRORLOG extern LOGERRPROC errorLog;
 #define LOGMSG(string) { if(errorLog){errorLog string;}}  

@@ -1,27 +1,13 @@
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 #ifndef MTL_UTILS_H
 #define MTL_UTILS_H
 
@@ -50,7 +36,7 @@ print_partitioned_vector(Vector x)
 {
   for (typename Vector::iterator i = x.begin();
        i != x.end(); ++i) {
-    mtl::print_vector(*i);
+    print_vector(*i);
   }
 }
 
@@ -63,7 +49,7 @@ print_partitioned_matrix(const Matrix& A)
   Int i,j;
   for (i=0; i < A.nrows(); ++i) {
     for (j=0; j < A.ncols(); ++j)
-      mtl::print_all_matrix( A(i,j) );
+      print_all_matrix( A(i,j) );
     std::cout << std::endl;
   }
 }
@@ -80,7 +66,7 @@ print_partitioned_by_row(const Matrix& A)
     A_i = (*A_kk).begin();
     A_iend = (*A_kk).end();
     while (not_at(A_i, A_iend)) {
-      mtl::print_all_matrix( *A_i );
+      print_all_matrix( *A_i );
       ++A_i;
     }
     ++A_kk;
@@ -99,7 +85,7 @@ print_partitioned_by_column(const Matrix& A)
     A_i = (*A_kk).begin();
     A_iend = (*A_kk).end();
     while (not_at(A_i, A_iend)) {
-      mtl::print_all_matrix( *A_i );
+      print_all_matrix( *A_i );
       ++A_i;
     }
     ++A_kk;
@@ -126,7 +112,7 @@ print_vector(Iterator y, Iterator y_end)
 {
   std::cout << "[";
   while (not_at(y, y_end)) {
-    cout << *y << ",";
+    std::cout << *y << ",";
     ++y;
   }
   std::cout << "]" << std::endl;
@@ -474,7 +460,7 @@ inline float
 make_rand_element(float)
 {
   float r = float(rand());
-  return r/float(RAND_MAX)*10.0;
+  return r/float(RAND_MAX)*10.0f;
 }
 
 inline double
@@ -594,65 +580,21 @@ insert_zero_matrix(Mat& A)
 
 }
 
-
-#if 0
-template <class Matrix>
-inline void
-zero_matrix(Matrix& A)
-{
-  typename Matrix::major_iterator row_iter = A.begin_major();
-  while (row_iter < A.end_major()) {
-    typename Matrix::MajorVector::iterator ri = (*row_iter).begin();
-    while (ri < (*row_iter).end()) {
-      *ri = 0.0;
-      ++ri;
-    }
-    ++row_iter;
-  }
-}
-#else
-template <class Matrix>
-inline void
-__zero_matrix(Matrix& A, row_tag)
-{
-  typedef typename matrix_traits<Matrix>::value_type T;
-  typename Matrix::iterator row_iter = A.begin();
-  while (row_iter < A.end()) {
-    typename Matrix::Row::iterator ri = (*row_iter).begin();
-    while (ri < (*row_iter).end()) {
-      *ri = T(0);
-      ++ri;
-    }
-    ++row_iter;
-  }
-}
-
-template <class Matrix>
-inline void
-__zero_matrix(Matrix& A, column_tag)
-{
-  typename Matrix::column_2Diterator col_iter = A.begin_columns();
-  while (col_iter < A.end_columns()) {
-    typename Matrix::ColumnVector::iterator ci = (*col_iter).begin();
-    while (ci < (*col_iter).end()) {
-      *ci = 0.0;
-      ++ci;
-    }
-    ++col_iter;
-  }
-}
-
 template <class Matrix>
 inline void
 zero_matrix(Matrix& A){
-  typedef typename Matrix::orientation Orien;
-  __zero_matrix(A, Orien());
+  typedef typename matrix_traits<Matrix>::value_type T;
+  typename Matrix::iterator oneD_iter = A.begin();
+  while (oneD_iter < A.end()) {
+    typename Matrix::OneD::iterator i = (*oneD_iter).begin();
+    while (i < (*oneD_iter).end()) {
+      *i = T(0);
+      ++i;
+    }
+    ++oneD_iter;
+  }
 }
-
-
-
-#endif
-
+  
 #if 0
 template <class Orien>
 inline void

@@ -1,7 +1,7 @@
 #ifndef __OBJFILE_H_
 #define __OBJFILE_H_
 
-#include "..\\InterceptPluginInterface.h"
+#include "../../MainLib/InterceptPluginInterface.h"
 
 #include <string>
 #include <vector>

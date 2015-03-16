@@ -1,28 +1,14 @@
 // -*- c++ -*-
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 #ifndef MTL_COMPRESSED_CONTIG2D_H
@@ -612,11 +598,11 @@ public:
   }
 
   void print() const {
-    cout << "values ";
+    std::cout << "values ";
     print_vector(*values);
-    cout << "indices ";
+    std::cout << "indices ";
     print_vector(*indices);
-    cout << "starts ";
+    std::cout << "starts ";
     print_vector(*starts);
   }
 
@@ -666,8 +652,8 @@ public:
     : Base(d, &vals, &inds, &ptrs),
       ptrs(d.first() + 1, -IND_OFFSET) /* F to C */
   {
-    vals.reserve(dim.first() * 5);
-    inds.reserve(dim.first() * 5);
+    vals.reserve(Base::dim.first() * 5);
+    inds.reserve(Base::dim.first() * 5);
   }
 
   inline compressed2D(dim_type d, size_type nnz)
@@ -683,8 +669,8 @@ public:
     : Base(d, &vals, &inds, &ptrs), 
       ptrs(d.first() + 1, -IND_OFFSET) /* F to C */
   {
-    vals.reserve(dim.first() * 5);
-    inds.reserve(dim.first() * 5);
+    vals.reserve(Base::dim.first() * 5);
+    inds.reserve(Base::dim.first() * 5);
   }
 
   //: Copy Constructor
@@ -702,8 +688,8 @@ public:
   inline self& operator=(const self& x) {
     vals = x.vals; ptrs = x.ptrs; inds = x.inds;
     /* fill out inhereted part */
-    dim = x.dim;
-    values = &vals; indices = &inds; starts = &ptrs;
+    Base::dim = x.dim;
+    Base::values = &vals; Base::indices = &inds; Base::starts = &ptrs;
     return *this;
   }
 
@@ -801,8 +787,8 @@ public:
   inline self& operator=(const self& x) {
     vals = x.vals; inds = x.inds; ptrs = x.ptrs;
     /* fill out inhereted part */
-    dim = x.dim;
-    values = &vals; indices = &inds; starts = &ptrs;
+    Base::dim = x.dim;
+    Base::values = &vals; Base::indices = &inds; Base::starts = &ptrs;
     return *this;
   }
 

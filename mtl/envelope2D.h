@@ -1,27 +1,13 @@
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 
 #ifndef MTL_ENVELOPE2D_H
 #define MTL_ENVELOPE2D_H
@@ -93,7 +79,7 @@ public:
     typedef dense_iterator<const_values_iterator> const_iterator;
 #else
     typedef dense_iterator<T, 0> iterator;
-	typedef dense_iterator<T, 1> const_iterator;
+    typedef dense_iterator<T, 1> const_iterator;
 #endif
     typedef reverse_iter<iterator> reverse_iterator;
     typedef reverse_iter<const_iterator> const_reverse_iterator;
@@ -296,9 +282,9 @@ public:
   inline envelope2D() : dim(0,0) { }
   //: Constructor from dimension pair
   inline envelope2D(dim_type d)
-    : dim(d), val(1, T(0)), ptr(m, size_type(0))
+    : dim(d), val(1, T(0)), ptr(d.first(), size_type(0))
   { 
-    val.reserve(m * 5);
+    val.reserve(dim.first() * 5);
   }
   //: Constructor from dimension abd bandwidth pairs
   inline envelope2D(dim_type d, dim_type)
@@ -359,11 +345,13 @@ public:
   inline size_type nnz() const { return val.size(); }
 
   //: Return a reference to the (i,j) element, where (i,j) is in the 2D coordinate system
-  inline vec_ref::reference operator()(size_type i, size_type j) {
+  inline typename vec_ref::reference 
+  operator()(size_type i, size_type j) {
     return reference(i, &val, &ptr)[j];
   }
   //: Return a const reference to the (i,j) element, where (i,j) is in the 2D coordinate system
-  inline const vec_ref::reference operator()(size_type i, size_type j) const {
+  inline const typename vec_ref::reference 
+  operator()(size_type i, size_type j) const {
     return const_reference(i, (values_t*)&val, (ptr_t*)&ptr)[j];
   }
 

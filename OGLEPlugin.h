@@ -1,7 +1,7 @@
 #ifndef __FUNCTION_STATS_PLUGIN_H_
 #define __FUNCTION_STATS_PLUGIN_H_
 
-#include "..\\InterceptPluginInterface.h"
+#include "../../MainLib/InterceptPluginInterface.h"
 
 #include <vector>
 #include <string>

@@ -1,7 +1,12 @@
 #ifndef __OGLE_H_
 #define __OGLE_H_
 
-#include "..\\InterceptPluginInterface.h"
+#include <gl/gl.h>
+
+#include "../../MainLib/InterceptPluginInterface.h"
+
+#undef min
+#undef max
 
 #include "mtl/mtl.h"
 #include "mtl/matrix.h"

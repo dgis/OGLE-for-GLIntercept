@@ -1,28 +1,14 @@
 // -*- c++ -*-
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 #ifndef MTL_DENSE2D_H
@@ -90,7 +76,10 @@ public:
   typedef strideable strideability;
   // VC++ doesn't like this 
   //friend class transpose_type;
-  inline rect_offset() : dim(4444,4444), ld(4444) { }
+
+  //what is that for? -- llee
+  //inline rect_offset() : dim(4444,4444), ld(4444) { }
+  inline rect_offset() : dim(0,0), ld(0) { }
   inline rect_offset(const rect_offset& x) : dim(x.dim), ld(x.ld) { }
   inline rect_offset(size_type m, size_type n, size_type ld_)
     : dim(m, n), ld(ld_) { }
@@ -194,7 +183,7 @@ struct gen_strided_offset {
 };
 
 template <class size_t, int MM, int NN>
-inline rect_offset<size_t,MM,NN>::rect_offset(const rect_offset<size_t,MM,NN>::transpose_type& x)
+inline rect_offset<size_t,MM,NN>::rect_offset(const typename rect_offset<typename size_t,MM,NN>::transpose_type& x)
   : dim(x.dim), ld(x.ld) { }
 
 
@@ -794,7 +783,7 @@ protected:
   //JGS Nasty VC++ workaround
   typedef typename OffsetGen::type Offset;
 #else
-  typedef typename OffsetGen:: MTL_TEMPLATE bind<size_type>::type Offset;
+  typedef typename OffsetGen:: template bind<size_type>::type Offset;
 #endif
 
   typedef dimension<elt_type> dyn_dim;
@@ -819,7 +808,7 @@ protected:
   enum { offset_strided = Offset::IS_STRIDED };
   typedef typename IF<offset_strided, strided1D<InnerOneD>, InnerOneD>::RET OneD;
 #else
-  typedef typename Offset:: MTL_TEMPLATE bind_oned<InnerOneD>::type OneD;
+  typedef typename Offset:: template bind_oned<InnerOneD>::type OneD;
 #endif
 
   typedef OneD OneDRef;
@@ -1140,6 +1129,7 @@ public:
   //: Pair type for bandwidth
   typedef typename Offset::band_type band_type;
   typedef typename super::reptype reptype;
+  typedef typename super::rep_ptr rep_ptr;
   //: Unsigned integral type for dimensions and indices
   typedef typename super::size_type size_type;
   //: The transpose type
@@ -1229,10 +1219,10 @@ public:
   inline ~dense2D() { }
 
   inline void resize(size_type m, size_type n) {
-    rep_ptr newdata = new std::vector<T>(Offset::size(m, n, 0, 0));
+    rep_ptr newdata = new reptype(Offset::size(m, n, 0, 0));
     size_type i, j;
-    size_type M = MTL_MIN(m, offset.major());
-    size_type N = MTL_MIN(n, offset.minor());
+    size_type M = MTL_MIN(m, super::offset.major());
+    size_type N = MTL_MIN(n, super::offset.minor());
     for (i = 0; i < M; ++i)
       for (j = 0; j < N; ++j)
 	(*newdata)[i * n + j] = (*this)(i,j);
@@ -1240,10 +1230,10 @@ public:
       for (; j < n; ++j)
       (*newdata)[i * n + j] = T();
 
-    data_ = newdata;
-    ld_ = n;
-    offset.dim = dim_type(m, n);
-    offset.ld = n;
+    super::data_ = newdata;
+    super::ld_ = n;
+    super::offset.dim = dim_type(m, n);
+    super::offset.ld = n;
   }
 
 };
@@ -1359,7 +1349,7 @@ public:
   inline external2D& operator=(const external2D& x) {
     rep = x.rep;
     super::operator=(x);
-    data_ = &rep;
+    super::data_ = &rep;
     return *this;
   }
 

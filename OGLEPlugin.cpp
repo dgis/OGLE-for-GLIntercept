@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "..\\InterceptPluginInterface.h"
+#include "../../MainLib/InterceptPluginInterface.h"
 #include "OGLEPlugin.h"
 #include "ogle.h"
 
@@ -351,15 +351,18 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 		ogle->glArrayElement(i);
 	}
 	else if(strcmp(funcName, "glVertex3fv") == 0) {
-		GLfloat *V; _args.Get(V);
-		ogle->glVertexfv(V, 3);
+		//GLfloat *V; _args.Get(V);
+		void *V; _args.Get(V);
+		ogle->glVertexfv((GLfloat *)V, 3);
 	}
 	else if(strcmp(funcName, "glVertex3f") == 0) {
 		GLfloat V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));
 		ogle->glVertexfv(V, 3);
 	}
 	else if(strcmp(funcName, "glVertex3dv") == 0) {
-		GLdouble *V; _args.Get(V);
+		//GLdouble *V; _args.Get(V);
+		void *VV; _args.Get(VV);
+		GLdouble *V = (GLdouble *)VV;
 		GLfloat tmp[3]; tmp[0] = V[0]; tmp[1] = V[1]; tmp[2] = V[2];
 		ogle->glVertexfv(tmp, 3);
 	}
@@ -369,20 +372,23 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 		ogle->glVertexfv(tmp, 3);
 	}
 	else if(strcmp(funcName, "glNormal3fv") == 0) {
-		GLfloat *V; _args.Get(V);
-		ogle->glNormalfv(V, 3);
+		//GLfloat *V; _args.Get(V);
+		void *V; _args.Get(V);
+		ogle->glNormalfv((GLfloat *)V, 3);
 	}
 	else if(strcmp(funcName, "glNormal3f") == 0) {
 		GLfloat V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));
 		ogle->glNormalfv(V, 3);
 	}
 	else if(strcmp(funcName, "glTexCoord3fv") == 0) {
-		GLfloat *V; _args.Get(V);
-		ogle->glTexCoordfv(V, 3);
+		//GLfloat *V; _args.Get(V);
+		void *V; _args.Get(V);
+		ogle->glTexCoordfv((GLfloat *)V, 3);
 	}
 	else if(strcmp(funcName, "glTexCoord2fv") == 0) {
-		GLfloat *V; _args.Get(V);
-		ogle->glTexCoordfv(V, 2);
+		//GLfloat *V; _args.Get(V);
+		void *V; _args.Get(V);
+		ogle->glTexCoordfv((GLfloat *)V, 2);
 	}
 	else if(strcmp(funcName, "glTexCoord3f") == 0) {
 		GLfloat V[3]; _args.Get(*V); _args.Get(*(V+1)); _args.Get(*(V+2));

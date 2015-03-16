@@ -1,32 +1,20 @@
 // -*- c++ -*-
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 #ifndef _MTL_MTL_H_
 #define _MTL_MTL_H_
+
+#include "mtl/mtl_decl.h" 
 
 #include <functional>
 #include <iostream>
@@ -61,7 +49,7 @@
     not be passed by value for the output argument
     since they are not handles.
  */
-#define MTL_OUT(X) const X&
+// #define MTL_OUT(X) const X& // moved to mtl_decl.h 
 
 namespace mtl {
 
@@ -349,8 +337,8 @@ template <class Matrix>
 inline typename linalg_traits<Matrix>::magnitude_type
 major_norm__(const Matrix& A)
 {
-  typedef linalg_traits<Matrix>::magnitude_type T;
-  typedef matrix_traits<Matrix>::size_type Int;
+  typedef typename linalg_traits<Matrix>::magnitude_type T;
+  typedef typename matrix_traits<Matrix>::size_type Int;
   T norm = 0;
   T sum = 0;
   typename Matrix::const_iterator i;
@@ -386,8 +374,8 @@ template <class Matrix>
 inline typename linalg_traits<Matrix>::magnitude_type
 minor_norm__(const Matrix& A)
 {
-  typedef linalg_traits<Matrix>::magnitude_type T;
-  typedef matrix_traits<Matrix>::size_type Int;
+  typedef typename linalg_traits<Matrix>::magnitude_type T;
+  typedef typename matrix_traits<Matrix>::size_type Int;
   typename Matrix::const_iterator i;
   typename Matrix::OneD::const_iterator j, jend;
 
@@ -414,7 +402,7 @@ template <class Matrix>
 inline typename linalg_traits<Matrix>::magnitude_type
 symmetric_norm(const Matrix& A, row_tag)
 {
-  typedef linalg_traits<Matrix>::magnitude_type T;
+  typedef typename linalg_traits<Matrix>::magnitude_type T;
   typename Matrix::const_iterator i;
   typename Matrix::OneD::const_iterator j, jend;
   
@@ -442,7 +430,7 @@ template <class Matrix>
 inline typename linalg_traits<Matrix>::magnitude_type
 symmetric_norm(const Matrix& A, column_tag)
 {
-  typedef linalg_traits<Matrix>::magnitude_type T;
+  typedef typename linalg_traits<Matrix>::magnitude_type T;
   typename Matrix::const_iterator i;
   typename Matrix::OneD::const_iterator j, jend;
   
@@ -478,7 +466,7 @@ template <class Matrix>
 inline typename linalg_traits<Matrix>::magnitude_type
 diagonal_one_norm(const Matrix& A)
 {
-  typedef linalg_traits<Matrix>::magnitude_type T;
+  typedef typename linalg_traits<Matrix>::magnitude_type T;
   typename Matrix::const_iterator i;
   typename Matrix::OneD::const_iterator j, jend;
 
@@ -497,7 +485,7 @@ template <class Matrix>
 inline typename linalg_traits<Matrix>::magnitude_type
 diagonal_infinity_norm(const Matrix& A)
 {
-  typedef linalg_traits<Matrix>::magnitude_type T;
+  typedef typename linalg_traits<Matrix>::magnitude_type T;
   typename Matrix::const_iterator i;
   typename Matrix::OneD::const_iterator j, jend;
 
@@ -748,7 +736,7 @@ min_abs_index(const Vec& x)
 // Returns the value of the element with the maximum value
 template <class VectorT>
 inline typename VectorT::value_type
-max_fixed(const VectorT& x)
+max(const VectorT& x)
 {
   return *mtl_algo::max_element(x.begin(), x.end());
 }
@@ -763,7 +751,7 @@ max_fixed(const VectorT& x)
 //!typereqs: <tt>Vec::value_type</tt> must be LessThanComparible.
 template <class VectorT>
 inline typename VectorT::value_type
-min_fixed(const VectorT& x)
+min(const VectorT& x)
 {
   return *mtl_algo::min_element(x.begin(), x.end());
 }
@@ -1045,7 +1033,7 @@ protected:
 
 class givens_rotation < std::complex<double> > {
   typedef double T;
-  typedef std::complex<double> C;
+  typedef std::complex<T> C;
 public:
   //:
   inline givens_rotation() : cs(0), sn(0)
@@ -1066,7 +1054,7 @@ public:
       //in zrotg there is an assignment for ca, what is that for? 
     } else {
       T scale = a + b;
-      T norm = sqrt(abs_sq(a_in/scale)+abs_sq(b_in/scale)) * scale;
+      T norm = std::sqrt(abs_sq(a_in/scale)+abs_sq(b_in/scale)) * scale;
     
       cs = a / norm;
       sn = a_in/a * std::conj(b_in)/norm;
@@ -1154,7 +1142,7 @@ protected:
 //!component: type
 class givens_rotation < std::complex<float> > {
   typedef float T;
-  typedef std::complex<float> C;
+  typedef std::complex<T> C;
 public:
   //:
   inline givens_rotation() : cs(0), sn(0)
@@ -1176,7 +1164,7 @@ public:
       //in zrotg there is an assignment for ca, what is that for? 
     } else {
       T scale = a + b;
-      T norm = sqrt(abs_sq(a_in/scale)+abs_sq(b_in/scale)) * scale;
+      T norm = std::sqrt(abs_sq(a_in/scale)+abs_sq(b_in/scale)) * scale;
     
       cs = a / norm;
       sn = a_in/a * std::conj(b_in)/norm;
@@ -1304,7 +1292,7 @@ inline void generate_householder(T& alpha, const Vec& x,
     tau = T(0); // H = I
   else {
     Real beta = -xfer_sign(two_norm3(alpha_r, alpha_i, xnorm), alpha_r);
-    Real safe_min = std::numeric_limits<Real>::min_fixed();
+    Real safe_min = std::numeric_limits<Real>::min();
     Real r_safe_min = Real(1) / safe_min;
     
     int count = 0;
@@ -1480,8 +1468,8 @@ mult_shape__(const Matrix& A, const VecX& x, VecZ& z,
  */
 template <class Matrix, class VecX, class VecZ>
 inline void
-rect_mult(const Matrix& A, const VecX& xx, VecZ& zz,
-          row_tag) MTL_THROW_ASSERTION
+rect_mult(const Matrix& A, const VecX& xx, VecZ& zz, 
+          row_tag, dense_tag) MTL_THROW_ASSERTION
 {
   MTL_ASSERT(A.nrows() <= zz.size(), "mtl::mult()");
   MTL_ASSERT(A.ncols() <= xx.size(), "mtl::mult()");
@@ -1510,7 +1498,7 @@ rect_mult(const Matrix& A, const VecX& xx, VecZ& zz,
 template <class Matrix, class VecX, class VecZ>
 inline void
 rect_mult(const Matrix& A, const VecX& xx, VecZ& zz,
-          column_tag) MTL_THROW_ASSERTION
+          column_tag, dense_tag) MTL_THROW_ASSERTION
 {
   MTL_ASSERT(A.nrows() <= zz.size(), "mtl::mult()");
   MTL_ASSERT(A.ncols() <= xx.size(), "mtl::mult()");
@@ -1530,13 +1518,41 @@ rect_mult(const Matrix& A, const VecX& xx, VecZ& zz,
   }
 }
 
+// x is sparse
+// A is column oriented
+template <class Matrix, class VecX, class VecY>
+void 
+rect_mult(const Matrix& A, const VecX& x, VecY& y, 
+	  column_tag, sparse_tag) 
+{
+  typename VecX::const_iterator xi = x.begin();
+  for (; xi != x.end(); ++xi) {
+    mtl::add(mtl::scaled(A[xi.index()], *xi), y);
+  }
+}
+  
+// x is sparse
+// A is row oriented
+template <class Matrix, class VecX, class VecY>
+void 
+rect_mult(const Matrix& A, const VecX& x, VecY& y, 
+	  row_tag, sparse_tag)
+{
+  typename Matrix::const_iterator Ai;
+  for (Ai = A.begin(); Ai != A.end(); ++Ai) {
+    y[Ai.index()] = mtl::dot(*Ai, x); // this is a sparse dot
+  }
+}
+
+
 template <class Matrix, class VecX, class VecZ>
 inline void
 mult_shape__(const Matrix& A, const VecX& x, VecZ z,
              rectangle_tag) MTL_THROW_ASSERTION
 {
-  typedef matrix_traits<Matrix>::orientation Orien;
-  rect_mult(A, x, z, Orien());
+  typedef typename matrix_traits<Matrix>::orientation Orien;
+  typedef typename linalg_traits<VecX>::sparsity SparseX;
+  rect_mult(A, x, z, Orien(), SparseX());
 }
 
 template <class Matrix, class VecX, class VecZ>
@@ -1773,9 +1789,9 @@ simple_mult(const MatrixA& A, const MatrixB& B, MatrixC& C,
     len += tmp1.nnz();
     ic[Ai.index() + 1] = len;
   }
-  typedef matrix<T, rectangle<>, 
-                 compressed<Int, external>, 
-                 row_major>::type  SpMat;
+  typedef typename matrix<T, rectangle<>, 
+    compressed<Int, external>, 
+    row_major>::type  SpMat;
   SpMat CC(M, N, len, c.data(), ic.data(), jc.data());
   copy(CC, C);
 }
@@ -1840,7 +1856,7 @@ simple_mult(const MatrixA& A, const MatrixB& B, MatrixC& C,
     ic[Bj.index() + 1] = len;
   }
   
-  typedef matrix<T, rectangle<>, 
+  typedef typename matrix<T, rectangle<>, 
                  compressed<Int, external>, 
                  column_major>::type  SpMat;
   SpMat CC(M, N, len, c.data(), ic.data(), jc.data());
@@ -2417,7 +2433,8 @@ inline void
 oned_copy(const VecX& x, VecY& y, dense_tag, dense_tag) MTL_THROW_ASSERTION
 {
   MTL_ASSERT(x.size() <= y.size(), "mtl::copy()");
-  copy__(x, y, dim_n<VecX>::RET());
+  // copy__(x, y, dim_n<VecX>::RET()); gcc4
+  copy__(x, y, typename dim_n<VecX>::RET());
 }  
 
 #if 0
@@ -2450,7 +2467,7 @@ inline void
 oned_copy(const VecX& x, VecY& y, sparse_tag, dense_tag) MTL_THROW_ASSERTION
 {
   typedef typename linalg_traits<VecY>::value_type T;
-  mtl::set(y, T(0));
+  mtl::set_value(y, T(0));
   typename VecX::const_iterator xi;
   for (xi = x.begin(); xi != x.end(); ++xi)
     y[xi.index()] = *xi;
@@ -2666,8 +2683,8 @@ void
 add__(const VecX& x, VecY& y, fast::count<0>)
 {
   typedef typename VecX::value_type T;
-  mtl_algo::transform(x.begin(), x.end(), y.begin(), 
-                      y.begin(), std::plus<T>());
+  mtl_algo::transform_add(x.begin(), x.end(), y.begin());
+
 }
 #if USE_BLAIS
 template <class VecX, class VecY, int N> inline
@@ -2749,7 +2766,8 @@ template <class VecX, class VecY, class VecZ>
 inline void
 oned_add(const VecX& x, const VecY& y, VecZ& z, dense_tag) MTL_THROW_ASSERTION
 {
-  oned_add(x, y, z, dim_n<VecX>::RET());
+  // oned_add(x, y, z, dim_n<VecX>::RET()); gcc4
+  oned_add(x, y, z, typename dim_n<VecX>::RET());
 }
 
 
@@ -2998,8 +3016,10 @@ ele_mult(const MatA& A, MTL_OUT(MatB) B_) MTL_THROW_ASSERTION
    * elements of B may get zeroed out,
    * but zero elements of B stay zero
    */
-  typename MatB::row_2Diterator B_i;  
-  typename MatB::RowVector::iterator j, jend;
+  //typename MatB::row_2Diterator B_i;  
+  //typename MatB::RowVector::iterator j, jend;
+  typename MatB::iterator i;
+  typename MatB::OneD::iterator j, jend;
 
   for (i = B.begin(); i != B.end(); ++i) {
     j = (*i).begin(); jend = (*i).end();
@@ -3199,8 +3219,8 @@ inline T
 dot(const VecX& x, const VecY& y, T s) MTL_THROW_ASSERTION
 {
   MTL_ASSERT(x.size() == y.size(), "mtl::dot()");
-  typedef typename VecX::sparsity SparseX;
-  typedef typename VecY::sparsity SparseY;
+  typedef typename linalg_traits<VecX>::sparsity SparseX;
+  typedef typename linalg_traits<VecY>::sparsity SparseY;
   return dot(x, y, s, SparseX(), SparseY());
 }
 

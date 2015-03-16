@@ -1,28 +1,14 @@
 // -*- c++ -*-
 //
-// Copyright 1997, 1998, 1999 University of Notre Dame.
+// Software License for MTL
+// 
+// Copyright (c) 2001-2005 The Trustees of Indiana University. All rights reserved.
+// Copyright (c) 1998-2001 University of Notre Dame. All rights reserved.
 // Authors: Andrew Lumsdaine, Jeremy G. Siek, Lie-Quan Lee
-//
+// 
 // This file is part of the Matrix Template Library
-//
-// You should have received a copy of the License Agreement for the
-// Matrix Template Library along with the software;  see the
-// file LICENSE.  If not, contact Office of Research, University of Notre
-// Dame, Notre Dame, IN  46556.
-//
-// Permission to modify the code and to distribute modified code is
-// granted, provided the text of this NOTICE is retained, a notice that
-// the code was modified is included with the above COPYRIGHT NOTICE and
-// with the COPYRIGHT NOTICE in the LICENSE file, and that the LICENSE
-// file is distributed with the modified code.
-//
-// LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
-// By way of example, but not limitation, Licensor MAKES NO
-// REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
-// PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE COMPONENTS
-// OR DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS
-// OR OTHER RIGHTS.
-//
+// 
+// See also license.mtl.txt in the distribution.
 //===========================================================================
 
 #ifndef _MTL_MATRIX_IMPLEMENTATION_H_
@@ -42,6 +28,8 @@
 #include "mtl/banded_indexer.h"
 #include "mtl/partition.h"
 #include "mtl/light_matrix.h"
+
+#include "mtl/initialize.h" 
 
 namespace mtl {
 
@@ -355,7 +343,7 @@ public:
     : twod(m_in, orien()), indexer(orien::map(dim_type(m_in.nrows(),
                                                        m_in.ncols())))
   { 
-    mtl::initialize(me, m_in);
+    mtl::initialize(me, m_in); 
   }
   template <class Me>
   inline matrix_implementation(mmstream& m_in, band_type bw, Me& me)
@@ -503,8 +491,10 @@ public:
   typedef row_matrix<typename TwoDGen::banded_view_type,
         gen_banded_indexer<typename IndexerGen::orienter,M,N,size_type> > banded_view_type;
 
+  typedef typename Indexer::band_type band_type; 
 
-#if !defined( __GNUC__ ) && !defined( _MSVCPP_ )  /* internal compiler error */
+  //#if !defined( __GNUC__ ) && !defined( _MSVCPP_ )  /* internal compiler error */
+#if !defined( MTL_DISABLE_BLOCKING )
   template <int BM, int BN>
   struct blocked_view {
 #if 0
@@ -535,7 +525,7 @@ public:
   inline row_matrix(size_type m, size_type n, size_type nnz_max) 
     : Base(dim_type(m, n), nnz_max) { }
   inline row_matrix(size_type m, size_type n, int sub, int super) 
-    : Base(dim_type(m, n), band_type(sub, super)) { }
+    : Base(dim_type(m, n), typename Indexer::band_type(sub, super)) { }
 
   //: external data constructors
   inline row_matrix(pointer data, size_type m, size_type n)
@@ -551,7 +541,7 @@ public:
   inline row_matrix(pointer data, size_type m, size_type n,
                     int sub, int super)
     : Base(data, dim_type(m, n), 
-           band_type(sub, super)) { }
+           band_type(sub, super)) { } 
   inline row_matrix(pointer data, size_type m, size_type n, size_type ld, 
                     int sub, int super)
     : Base(data, dim_type(m, n), ld,
@@ -623,8 +613,8 @@ public:
   inline ~row_matrix() { }
 
   inline void resize(size_type m, size_type n) { 
-    twod.resize(m, n); 
-    indexer.dim = dim_type(m, n);
+    Base::twod.resize(m, n);
+    Base::indexer.dim = dim_type(m, n);
   }
 
   /* submatrix */
@@ -634,7 +624,7 @@ public:
 #if defined(_MSVCPP_)
   typedef IndexerGen SubMatIndexerGen;
 #else
-  typedef typename IndexerGen:: MTL_TEMPLATE bind<new_sizeT>::other SubMatIndexerGen;
+  typedef typename IndexerGen:: template bind<new_sizeT>::other SubMatIndexerGen;
 #endif
   typedef row_matrix<SubTwoDGen, SubMatIndexerGen> submatrix_type;
 
@@ -653,18 +643,18 @@ public:
   inline submatrix_type sub_matrix(size_type row_start, size_type row_finish,
                                    size_type col_start, size_type col_finish) const
   {
-    dim_type starts = indexer.at(dim_type(row_start, col_start));
+    dim_type starts = Base::indexer.at(dim_type(row_start, col_start));
     size_type m = row_finish - row_start;
     size_type n = col_finish - col_start;
     typedef typename TwoD::is_strided IsStrided;
     if (IsStrided::id) {
-      return submatrix_type((value_type*)twod.data() 
-			    + starts.second() * twod.ld() + starts.first(),
-			    m, n, twod.ld());
+      return submatrix_type((value_type*)Base::twod.data() 
+			    + starts.second() * Base::twod.ld() + starts.first(),
+			    m, n, Base::twod.ld());
     } else {
-      return submatrix_type((value_type*)twod.data() 
-			    + starts.first() * twod.ld() + starts.second(),
-			    m, n, twod.ld());
+      return submatrix_type((value_type*)Base::twod.data() 
+			    + starts.first() * Base::twod.ld() + starts.second(),
+			    m, n, Base::twod.ld());
     }
   }
 
@@ -730,7 +720,8 @@ public:
   typedef column_matrix<typename TwoDGen::banded_view_type,
         gen_banded_indexer<typename IndexerGen::orienter,M,N,size_type> > banded_view_type;
 
-#if !defined( __GNUC__) && !defined( _MSVCPP_ ) /* internal compiler error */
+  //#if !defined( __GNUC__) && !defined( _MSVCPP_ ) /* internal compiler error */
+#if !defined( MTL_DISABLE_BLOCKING )
   template <int BM, int BN>
   struct blocked_view {
 #if 0
@@ -849,8 +840,8 @@ public:
   inline ~column_matrix() { }
 
   inline void resize(size_type m, size_type n) { 
-    twod.resize(n, m); 
-    indexer.dim = dim_type(n, n);
+    Base::twod.resize(n, m); 
+    Base::indexer.dim = dim_type(n, m);
   }
 
   /* submatrix */
@@ -860,7 +851,7 @@ public:
 #if defined(_MSVCPP_)
   typedef IndexerGen SubMatIndexerGen;
 #else
-  typedef typename IndexerGen:: MTL_TEMPLATE bind<new_sizeT>::other SubMatIndexerGen;
+  typedef typename IndexerGen:: template bind<new_sizeT>::other SubMatIndexerGen;
 #endif
   typedef column_matrix<SubTwoDGen, SubMatIndexerGen> submatrix_type;
                        
@@ -875,18 +866,18 @@ public:
   inline submatrix_type sub_matrix(size_type row_start, size_type row_finish,
                              size_type col_start, size_type col_finish) const
   {
-    dim_type starts = indexer.at(dim_type(row_start, col_start));
+    dim_type starts = Base::indexer.at(dim_type(row_start, col_start));
     size_type m = row_finish - row_start;
     size_type n = col_finish - col_start;
     typedef typename TwoD::is_strided IsStrided;
     if (IsStrided::id) {
-      return submatrix_type((value_type*)twod.data() 
-			    + starts.second() * twod.ld() + starts.first(),
-			    m, n, twod.ld());
+      return submatrix_type((value_type*)Base::twod.data() 
+			    + starts.second() * Base::twod.ld() + starts.first(),
+			    m, n, Base::twod.ld());
     } else {
-      return submatrix_type((value_type*)twod.data() 
-			    + starts.first() * twod.ld() + starts.second(),
-			    m, n, twod.ld());
+      return submatrix_type((value_type*)Base::twod.data() 
+			    + starts.first() * Base::twod.ld() + starts.second(),
+			    m, n, Base::twod.ld());
     }
   }
 
@@ -1147,6 +1138,10 @@ public:
   inline triangle_matrix(const strided_type& x, do_strided s)
     : Base(x, s) { }
 
+  inline triangle_matrix(const triangle_matrix& x, do_strided)
+    : Base(x) { }
+
+
   typedef matrix_market_stream<value_type> mmstream;
   typedef harwell_boeing_stream<value_type> hbstream;
   inline triangle_matrix(mmstream& m_in) 
@@ -1222,11 +1217,11 @@ public:
 
   //: dynamic uplo constructor
   inline symmetric_matrix(size_type n, int uplo_, int sub)
-    : Base(m, n, Uplo::bandwidth(uplo_, sub, sub)) , uplo(uplo_) { }
+    : Base(n, n, Uplo::bandwidth(uplo_, sub, sub)) , uplo(uplo_) { }
 
   //: constructor for external data with dynamic uplo
   inline symmetric_matrix(pointer d, size_type n, int uplo_, int sub)
-    : Base(d, m, n, 
+    : Base(d, n, n, 
            Uplo::bandwidth(uplo_, sub, sub).first,
            Uplo::bandwidth(uplo_, sub, sub).second) { }
 
@@ -1302,10 +1297,10 @@ public:
   
   /* bandwidth (is symmetric too) */
   inline int sub() const {
-    return MTL_MAX(indexer.super(), indexer.sub());
+    return MTL_MAX(Base::indexer.super(), Base::indexer.sub());
   }
   inline int super() const { 
-    return MTL_MAX(indexer.super(), indexer.sub());
+    return MTL_MAX(Base::indexer.super(), Base::indexer.sub());
   }
 
 };
