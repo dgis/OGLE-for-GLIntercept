@@ -138,10 +138,10 @@
   </li>
 
   <li>
-    In using GLIntercept, the author has noticed some problems you may also encounter:
+    In using GLIntercept, the author has noticed some problems you may also encounter: <a name="gliproblems"></a>
     <ul>
       <li>
-      	Some applications do not seem to want to function with GLIntercept if the real 
+      	Some applications do not seem to want to function (i.e. they crash!) with GLIntercept if the real 
 	<code>OpenGL32.dll</code> is in the system location.  If you are having wierd problems, 
 	try the following:
 	<ol>
@@ -244,6 +244,7 @@ PluginData
     OGLE = ("OGLE/OGLE.dll") 
     {
 	Scale = 1.0;
+	FlipPolygonStrips = True;
 	CaptureNormals = False;
 	LogFunctions = False;
 	ObjFileName = "ogle";
@@ -274,6 +275,12 @@ PluginData
 	  you are capturing from uses absurdly small or large scales for no particular reason (you may recognize the need for this if the result file is very difficult to look at in your 3D modeling software).
 
 	</li>
+
+        <li>
+	  <code>FlipPolygonStrips</code><br>
+          Flip (re-orient) every other polygon drawn with the <code>TRIANGLE_STRIP</code> or <code>QUAD_STRIP</code> primitive.  This mimics OpenGL's behavior to get all the polygons facing the right way.  Defaults to <code>True</code>.
+	</li>
+
 
         <li>
 	  <code>CaptureNormals</code><br>
@@ -335,7 +342,7 @@ PluginData
     </li>
     <li>
       Find the <code>.obj</code> file in the directory where your application runs.  Open it in 
-      <a href="http://blender.org/cms/Home.2.0.html">Blender</a> (free!), 
+      <a href="http://blender.org/cms/Home.2.0.html">Blender</a> (free!), <a href="http://artofillusion.org/">ArtOfIllusion</a> (also free!),  
       <a href="http://www.alias.com/glb/eng/products-services/family_details.jsp;jsessionid=53NE4KGL3GQQRQCLCWSSM44AJMK0IJVC?familyId=3900009">Maya</a> (not free),
       or whatever other 3D editing/viewing/modelling application you use.
     </li>
@@ -352,6 +359,9 @@ PluginData
   <b>FAQ:</b><br>
 
   <ul>
+  <li><i>My program crashes off the bat whenever I try to run it with OGLE</i>:
+  You probably missed the pointers in the GLIntercept problems section of this page (step 3 of the Installation instructions).
+  </li>
   <li><i>OGLE runs, but doesn't appear to capture any useful data when I open the .obj file in my 3D modeler</i>:
 <BR> 
 It is possible that the application works on a scale that so big or so small that it's hard to view the data.  Try playing with the <code>Scale</code> configuration option.

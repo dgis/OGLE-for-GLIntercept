@@ -29,11 +29,8 @@ int OGLE::vertexCount = 0;
 int OGLE::normalCount = 0;
 int OGLE::groupCount = 0;
 
-float OGLE::scale = 1.0;
-bool OGLE::logFunctions = 0;
-bool OGLE::captureNormals = 0;
 
-char *OGLE::polyTypes[] = {
+char *OGLE::Config::polyTypes[] = {
 	"TRIANGLES",
 	"TRIANGLE_STRIP",
 	"TRIANGLE_FAN",
@@ -41,8 +38,9 @@ char *OGLE::polyTypes[] = {
 	"QUAD_STRIP",
 	"POLYGON"
 };
-int OGLE::nPolyTypes = 6;
-map<const char*, bool, OGLE::ltstr> OGLE::polyTypesEnabled;
+int OGLE::Config::nPolyTypes = 6;
+
+OGLE::Config OGLE::config;
 
 FILE *OGLE::LOG = fopen("ogle.log", "w");
 
@@ -169,13 +167,13 @@ void  OGLE::glVertexfv(GLfloat *V, GLsizei n) {
 
 	if(currSet) {
 		currSet->addElement(new OGLE::Element(new OGLE::Vertex(V, n), currTexture, 
-			(captureNormals ? currNormal : 0))
+			(OGLE::config.captureNormals ? currNormal : 0))
 			);
 	}
 }
 
 void  OGLE::glNormalfv(GLfloat *V, GLsizei n) {
-	if(captureNormals) {
+	if(OGLE::config.captureNormals) {
 		currNormal = new OGLE::Vertex(V, n);
 		currNormal->w = 0;
 	}
@@ -210,7 +208,7 @@ void OGLE::glArrayElement(GLint i) {
 	BlobPtr dimP, typeP, strideP;
 	
 	narrayP = glState["GL_NORMAL_ARRAY_POINTER"];
-	if(narrayP && captureNormals) {
+	if(narrayP && OGLE::config.captureNormals) {
 		if(narray = getBufferedArray((GLbyte *) narrayP->toVoidP())) {
 			typeP = glState["GL_NORMAL_ARRAY_TYPE"];
 			if((typeP && (type = typeP->toEnum()))) {
@@ -626,7 +624,7 @@ bool OGLE::isIdentityTransform(Transform T) {
 void OGLE::Vertex::printToObjFile(FILE *f, const char *typeStr) {
 	if(!f) return;
 
-	float scale = OGLE::scale;
+	float scale = OGLE::config.scale;
 	fprintf(f, "v%s %e %e %e\n", typeStr, scale * x, scale * y, scale * z);
 }
 
@@ -676,7 +674,7 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 	ObjFile::FacePtr face = new ObjFile::Face();
 
 	if(0) {}
-	else if(mode == GL_TRIANGLES && polyTypesEnabled["TRIANGLES"]) {
+	else if(mode == GL_TRIANGLES && OGLE::config.polyTypesEnabled["TRIANGLES"]) {
 		if(vertices.size() >= 3) fprintf(f, "#TRIANGLES\ng %d\n", OGLE::nextGroupID());
 		for(i = 0; i < vertices.size(); i++) {
 			VertexPtr v = vertices[i]->v;
@@ -700,8 +698,9 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 		}
 	}
 
-	else if(mode == GL_TRIANGLE_STRIP && polyTypesEnabled["TRIANGLE_STRIP"]) {
+	else if(mode == GL_TRIANGLE_STRIP && OGLE::config.polyTypesEnabled["TRIANGLE_STRIP"]) {
 		if(vertices.size() >= 3) fprintf(f, "#TRIANGLE_STRIP\ng %d\n", OGLE::nextGroupID());
+		int flip_flag = 1;
 		for(i = 0; i < vertices.size(); i++) {
 			VertexPtr v = vertices[i]->v;
 			v->printToObjFile(f);
@@ -717,13 +716,17 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 			face->addVertex(ov);
 
 			if(i >= 2) {
-				face->printToObj(f);
+				face->printToObj(f,
+					OGLE::config.flipPolyStrips	&& (flip_flag = (flip_flag + 1) % 2)
+					);
+
 				face->shiftVertices(1);
+
 			}
 		}
 	}
 
-	else if(mode == GL_TRIANGLE_FAN && polyTypesEnabled["TRIANGLE_FAN"]) {
+	else if(mode == GL_TRIANGLE_FAN && OGLE::config.polyTypesEnabled["TRIANGLE_FAN"]) {
 		if(vertices.size() >= 3) fprintf(f, "#TRIANGLE_FAN\ng %d\n", OGLE::nextGroupID());
 
 		ObjFile::Vertex firstv;
@@ -754,7 +757,7 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 		}
 	}
 
-	else if(mode == GL_QUADS && polyTypesEnabled["QUADS"]) {
+	else if(mode == GL_QUADS && OGLE::config.polyTypesEnabled["QUADS"]) {
 		if(vertices.size() >= 4) fprintf(f, "#QUADS\ng %d\n", OGLE::nextGroupID());
 		for(i = 0; i < vertices.size(); i++) {
 			VertexPtr v = vertices[i]->v;
@@ -777,8 +780,9 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 		}
 	}
 
-	else if(mode == GL_QUAD_STRIP && polyTypesEnabled["QUAD_STRIP"]) {
+	else if(mode == GL_QUAD_STRIP && OGLE::config.polyTypesEnabled["QUAD_STRIP"]) {
 		if(vertices.size() >= 4) fprintf(f, "#QUAD_STRIP\ng %d\n", OGLE::nextGroupID());
+		int flip_flag = 1;
 		for(i = 0; i < vertices.size(); i++) {
 			VertexPtr v = vertices[i]->v;
 			v->printToObjFile(f);
@@ -794,13 +798,15 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 			face->addVertex(ov);
 
 			if(i >= 3) {
-				face->printToObj(f);
+				face->printToObj(f,
+					OGLE::config.flipPolyStrips	&& (flip_flag = (flip_flag + 1) % 2)					
+					);
 				face->shiftVertices(1);
 			}
 		}
 	}
 
-	else if(mode == GL_POLYGON && polyTypesEnabled["POLYGON"]) {
+	else if(mode == GL_POLYGON && OGLE::config.polyTypesEnabled["POLYGON"]) {
 		if(vertices.size() >= 3) fprintf(f, "#POLYGON [%d]\ng %d\n", vertices.size(), OGLE::nextGroupID());
 		for(i = 0; i < vertices.size(); i++) {
 			VertexPtr v = vertices[i]->v;
@@ -822,9 +828,12 @@ void OGLE::ElementSet::printToObj(FILE *f) {
 }
 
 
-void OGLE::ObjFile::Face::printToObj(FILE *f) {
+void OGLE::ObjFile::Face::printToObj(FILE *f, bool flip) {
 	fprintf(f, "f ");
-	for(int i = 0; i < vertices.size(); i++) {
+	for(int i = (flip ? vertices.size() - 1 : 0); 
+					i < vertices.size() && i >= 0; 
+					i += (flip ? -1 : 1)) {
+
 		Vertex v = vertices[i];
 		fprintf(f, "%d", v.vid);
 		if(v.nid) {

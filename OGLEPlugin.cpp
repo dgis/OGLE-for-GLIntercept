@@ -59,16 +59,24 @@ void OGLEPlugin::ProcessConfigData(ConfigParser *parser)
 
   if(testToken)
   {
-	  testToken->Get(OGLE::scale);
-	  fprintf(OGLE::LOG, "SCALE: %f\n", OGLE::scale);
+	  testToken->Get(OGLE::config.scale);
+	  fprintf(OGLE::LOG, "SCALE: %f\n", OGLE::config.scale);
   }
 
   testToken = parser->GetToken("CaptureNormals");
 
   if(testToken)
   {
-	  testToken->Get(OGLE::captureNormals);
-	  fprintf(OGLE::LOG, "CAPTURE NORMALS: %d\n", OGLE::captureNormals);
+	  testToken->Get(OGLE::config.captureNormals);
+	  fprintf(OGLE::LOG, "CAPTURE NORMALS: %d\n", OGLE::config.captureNormals);
+  }
+
+  testToken = parser->GetToken("FlipPolygonStrips");
+
+  if(testToken)
+  {
+	  testToken->Get(OGLE::config.flipPolyStrips);
+	  fprintf(OGLE::LOG, "FLIP POLY STRIPS: %d\n", OGLE::config.flipPolyStrips);
   }
 
 
@@ -76,8 +84,8 @@ void OGLEPlugin::ProcessConfigData(ConfigParser *parser)
 
   if(testToken)
   {
-	  testToken->Get(OGLE::logFunctions);
-	  fprintf(OGLE::LOG, "LOG FUNCTIONS: %d\n", OGLE::logFunctions);
+	  testToken->Get(OGLE::config.logFunctions);
+	  fprintf(OGLE::LOG, "LOG FUNCTIONS: %d\n", OGLE::config.logFunctions);
   }
 
 
@@ -104,8 +112,8 @@ void OGLEPlugin::ProcessConfigData(ConfigParser *parser)
   }
 
 
-  for(int i = 0; i < OGLE::nPolyTypes; i++) {
-	  const char *type = OGLE::polyTypes[i];
+  for(int i = 0; i < OGLE::Config::nPolyTypes; i++) {
+	  const char *type = OGLE::Config::polyTypes[i];
 
 	  testToken = parser->GetToken(type);
 
@@ -113,7 +121,7 @@ void OGLEPlugin::ProcessConfigData(ConfigParser *parser)
 	  {
 		  bool tmp;
 		  testToken->Get(tmp);
-		  OGLE::polyTypesEnabled[type] = tmp;
+		  OGLE::config.polyTypesEnabled[type] = tmp;
 		  fprintf(OGLE::LOG, "%s: %d\n", type, tmp);
 	  }
   }
@@ -171,11 +179,6 @@ isRecording(0)
   
   //Get calls that are even outside contexts  
   gliCallBacks->SetContextFunctionCalls(true);
-
-  for(int i = 0; i < OGLE::nPolyTypes; i++) {
-	  const char *type = OGLE::polyTypes[i];
-	  OGLE::polyTypesEnabled[type] = 1;
-  }
 
   //Parse the config file
   ConfigParser fileParser;
@@ -261,7 +264,7 @@ void OGLEPlugin::GLFunctionPre (uint updateID, const char *funcName, uint funcIn
 
 	if(!isRecording) return;
 	
-	if(OGLE::logFunctions) {
+	if(OGLE::config.logFunctions) {
 		char buff[1024];
 		gliCallBacks->GetGLArgString(funcIndex, args, 1024, buff);
 		fprintf(OGLE::LOG, "PRE FUNCTION (%d): %s\n", funcIndex, buff);
@@ -378,7 +381,7 @@ void OGLEPlugin::GLFunctionPost(uint updateID, const char *funcName, uint funcIn
 
 	if(!isRecording) return;
 	
-	if(OGLE::logFunctions) {
+	if(OGLE::config.logFunctions) {
 		char buff[1024];
 		gliCallBacks->GetGLReturnString(funcIndex, retVal, 1024, buff);
 		fprintf(OGLE::LOG, "\t%s (%d) returned: %s\n",funcName, funcIndex, buff);

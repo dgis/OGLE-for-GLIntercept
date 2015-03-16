@@ -26,7 +26,6 @@ public:
 	typedef mtl::matrix < float >::type Transform;
     typedef mtl::dense1D < float > Vector;
 
-
 	//////////////////////////////////////////////////////////////////////
 	// OGLE::Vertex -- Class for OpenGL Vertexinate
 	//////////////////////////////////////////////////////////////////////
@@ -118,7 +117,7 @@ public:
 					inline void addVertex(Vertex v);
 					inline void shiftVertices(int n = 1);
 					inline void clear();
-					void printToObj(FILE *f);
+					void printToObj(FILE *f, bool flip = 0);
 
 					deque<Vertex>vertices;
 			};
@@ -176,15 +175,36 @@ public:
 	typedef Ptr<Buffer> BufferPtr;
 
 
-	////////////////////////////////////////////////////////////////////////
-	// OGLE -- the class for actually doing the OpenGLExtraction
-	////////////////////////////////////////////////////////////////////////
 
 	struct ltstr
 	{
 	  bool operator()(const char* s1, const char* s2) const
 	  { return strcmp(s1, s2) < 0; }
 	};
+
+
+	//////////////////////////////////////////////////////////////////////
+	// OGLE::Config -- Class for all OGLE config options
+	//////////////////////////////////////////////////////////////////////	
+
+	struct Config {
+		public: 
+			float scale;
+			bool logFunctions;
+			bool captureNormals;
+			bool flipPolyStrips;
+			map<const char*, bool, ltstr>polyTypesEnabled;			
+
+			static char *polyTypes[];
+			static int nPolyTypes;
+
+			inline Config();
+	};
+
+
+	////////////////////////////////////////////////////////////////////////
+	// OGLE -- the class for actually doing the OpenGLExtraction
+	////////////////////////////////////////////////////////////////////////
 
 
 	OGLE(InterceptPluginCallbacks *_callBacks, const GLCoreDriver *_GLV);
@@ -267,12 +287,7 @@ public:
 	static int groupCount;
 
 	static FILE *LOG;
-	static float scale;
-	static bool logFunctions;
-	static bool captureNormals;
-	static char *polyTypes[];
-	static int nPolyTypes;
-	static map<const char*, bool, ltstr>polyTypesEnabled;
+	static Config config;
 };
 
 typedef Ptr<OGLE> OGLEPtr;
@@ -360,6 +375,15 @@ void OGLE::ObjFile::Face::clear() {
 
 OGLE::Buffer::~Buffer() {
 	if(ptr) free(ptr);
+}
+
+
+
+OGLE::Config::Config() : scale(1), logFunctions(0), captureNormals(0), flipPolyStrips(1) {
+	for(int i = 0; i < OGLE::Config::nPolyTypes; i++) {
+		const char *type = OGLE::Config::polyTypes[i];
+		polyTypesEnabled[type] = 1;
+	}						
 }
 
 
